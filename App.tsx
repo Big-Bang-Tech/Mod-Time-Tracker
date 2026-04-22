@@ -46,6 +46,7 @@ const App: React.FC = () => {
   
   const projectsRef = useRef<LocalProject[]>([]);
   const wakeLockRef = useRef<any>(null);
+  const isCommittingRef = useRef(false);
 
   useEffect(() => { projectsRef.current = projects; }, [projects]);
 
@@ -145,41 +146,58 @@ const App: React.FC = () => {
 
   const commitDailyLogs = useCallback(async () => {
     if (!currentUser) return;
-    const activeProjects = projectsRef.current;
-    
-    for (const p of activeProjects) {
-       if (p.status === 'Running') {
-          await handleToggleTimer(p.id); 
-       }
-    }
+    if (isCommittingRef.current) return;
+    isCommittingRef.current = true;
 
-    const projectsToCommit = projectsRef.current.filter(p => p.currentDaySeconds > 0);
-    if (projectsToCommit.length === 0) return;
+    try {
+      const projectsToCommit = projectsRef.current.filter(p => p.currentDaySeconds > 0);
+      if (projectsToCommit.length === 0) return;
 
-    const today = new Date().toDateString();
-    for (const project of projectsToCommit) {
-      const finalLog: DailyLog & { comment?: string } = { 
-        id: `LOG-${Math.random().toString(36).substr(2, 6).toUpperCase()}`, 
-        userId: currentUser.id, 
-        date: today, 
-        projectId: project.id, 
-        projectName: project.name, 
-        durationSeconds: Math.floor(project.currentDaySeconds), 
-        status: 'NORMAL',
-        comment: (project as LocalProject).sessionComment ?? undefined
-      };
-      await db.saveLog(finalLog);
-      
-      await db.saveProject({
-        ...project,
-        userId: currentUser.id,
-        runningSince: null,
-        currentDaySeconds: 0,
-        sessionComment: undefined
-      });
+      const today = new Date().toDateString();
+      const committedIds = new Set<string>();
+
+      for (const project of projectsToCommit) {
+        const finalLog: DailyLog & { comment?: string } = {
+          id: `LOG-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+          userId: currentUser.id,
+          date: today,
+          projectId: project.id,
+          projectName: project.name,
+          durationSeconds: Math.floor(project.currentDaySeconds),
+          status: 'NORMAL',
+          comment: (project as LocalProject).sessionComment ?? undefined
+        };
+
+        try {
+          await db.saveLog(finalLog);
+        } catch (err) {
+          console.error('Error guardando log, se omite el reset para no perder datos:', err);
+          continue;
+        }
+
+        await db.saveProject({
+          ...project,
+          userId: currentUser.id,
+          runningSince: null,
+          currentDaySeconds: 0,
+          sessionComment: undefined
+        });
+
+        committedIds.add(project.id);
+      }
+
+      if (committedIds.size > 0) {
+        setProjects(prev => prev.map(p =>
+          committedIds.has(p.id)
+            ? { ...p, status: 'Active' as const, runningSince: null, currentDaySeconds: 0, sessionComment: undefined }
+            : p
+        ));
+      }
+
+      loadUserData(currentUser.id);
+    } finally {
+      isCommittingRef.current = false;
     }
-    
-    loadUserData(currentUser.id);
   }, [currentUser]);
 
   const handleLogout = async () => {
@@ -319,8 +337,12 @@ const App: React.FC = () => {
 
   const handleEditLog = async (payload: { id: string; durationSeconds: number; date: string; comment?: string | null }) => {
     if (!currentUser) return;
+    // Normalizar fecha a formato toDateString (ej. "Tue Mar 03 2026") para que las gráficas la reconozcan
+    const dateStr = /^\d{4}-\d{2}-\d{2}$/.test(payload.date)
+      ? new Date(payload.date + 'T12:00:00').toDateString()
+      : payload.date;
     try {
-      await db.updateLog({ ...payload, modifiedByUserId: currentUser.id });
+      await db.updateLog({ ...payload, date: dateStr, modifiedByUserId: currentUser.id });
       loadUserData(currentUser.id);
     } catch (e) {
       alert('Error al guardar el movimiento.');

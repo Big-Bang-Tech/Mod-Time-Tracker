@@ -12,6 +12,31 @@ const API_URL = getApiUrl();
 const isLocal = () =>
   window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
+const LOG_OVERRIDES_KEY = 'mod_tracker_log_overrides';
+
+function getLogOverrides(): Record<string, { date: string; durationSeconds: number; comment?: string | null }> {
+  try {
+    const raw = localStorage.getItem(LOG_OVERRIDES_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function setLogOverride(logId: string, data: { date: string; durationSeconds: number; comment?: string | null }) {
+  const overrides = getLogOverrides();
+  overrides[logId] = data;
+  localStorage.setItem(LOG_OVERRIDES_KEY, JSON.stringify(overrides));
+}
+
+/** Normaliza fecha a formato toDateString para consistencia con gráficas y listados */
+function normalizeDateStr(dateStr: string): string {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return new Date(dateStr + 'T12:00:00').toDateString();
+  }
+  return dateStr;
+}
+
 // Usuarios locales para poder entrar sin BD (Admin y Grobas)
 const LOCAL_MOCK_USERS = [
   { id: 'admin-001', username: 'Admin', password: '123456789', role: 'ADMIN', avatarSeed: 'admin-default', lastLogin: '', projectOrder: [] },
@@ -172,7 +197,19 @@ export class DBService {
     if (isLocal() && !this._dbConnected) {
       const { buildGrobasMockLogs, GROBAS_USER_ID } = await import('../mockData/grobasTestData');
       // Sin userId (historial) o para Grobas: devolver logs de prueba
-      if (userId === undefined || userId === GROBAS_USER_ID) return buildGrobasMockLogs();
+      if (userId === undefined || userId === GROBAS_USER_ID) {
+        let logs = buildGrobasMockLogs();
+        const overrides = getLogOverrides();
+        if (Object.keys(overrides).length > 0) {
+          logs = logs.map((log) => {
+            const o = overrides[log.id];
+            if (!o) return log;
+            return { ...log, date: o.date, durationSeconds: o.durationSeconds, comment: o.comment ?? undefined };
+          });
+          logs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        }
+        return logs;
+      }
       return [];
     }
     const action = userId ? `action=get_logs&userId=${encodeURIComponent(userId)}` : 'get_logs';
@@ -183,7 +220,7 @@ export class DBService {
       projectId: l.project_id,
       projectName: l.project_name,
       durationSeconds: parseInt(l.duration_seconds),
-      date: l.date_str,
+      date: normalizeDateStr(l.date_str ?? ''),
       status: l.status,
       comment: l.comment ?? undefined,
       created_at: l.created_at
@@ -201,8 +238,13 @@ export class DBService {
   }
 
   async updateLog(payload: { id: string; durationSeconds: number; date: string; comment?: string | null; modifiedByUserId: string }): Promise<void> {
-    if (isLocal() && !this._dbConnected) return;
-    return this.request('update_log', 'POST', payload);
+    if (isLocal() && !this._dbConnected) {
+      const dateStr = normalizeDateStr(payload.date);
+      setLogOverride(payload.id, { date: dateStr, durationSeconds: payload.durationSeconds, comment: payload.comment ?? null });
+      return;
+    }
+    const dateStr = normalizeDateStr(payload.date);
+    return this.request('update_log', 'POST', { ...payload, date: dateStr });
   }
 
   async getLogModificationHistory(logId: string): Promise<any[]> {

@@ -323,10 +323,10 @@ const MovementsView: React.FC<MovementsViewProps> = ({ currentUser, onDeleteLog,
         <EditLogModal
           entry={editingLog}
           onClose={() => setEditingLog(null)}
-          onSave={(payload) => {
-            onEditLog(payload);
+          onSave={async (payload) => {
+            await onEditLog(payload);
+            await loadData();
             setEditingLog(null);
-            loadData();
           }}
         />
       )}
@@ -354,20 +354,26 @@ function formatTimeFromSeconds(seconds: number): string {
 const EditLogModal: React.FC<{
   entry: DailyLog & { created_at?: string };
   onClose: () => void;
-  onSave: (payload: { id: string; durationSeconds: number; date: string; comment?: string | null }) => void;
+  onSave: (payload: { id: string; durationSeconds: number; date: string; comment?: string | null }) => void | Promise<void>;
 }> = ({ entry, onClose, onSave }) => {
+  // input type="date" requiere YYYY-MM-DD; entry.date puede venir como "Tue Mar 03 2026"
+  const toDateInputValue = (d: string) => {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
+    const t = new Date(d).getTime();
+    return Number.isNaN(t) ? new Date().toISOString().split('T')[0] : new Date(t).toISOString().split('T')[0];
+  };
   const [hours, setHours] = useState(Math.floor(entry.durationSeconds / 3600).toString());
   const [minutes, setMinutes] = useState(Math.floor((entry.durationSeconds % 3600) / 60).toString());
   const [seconds, setSeconds] = useState(Math.floor(entry.durationSeconds % 60).toString());
-  const [date, setDate] = useState(entry.date);
+  const [date, setDate] = useState(toDateInputValue(entry.date));
   const [comment, setComment] = useState(entry.comment ?? '');
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const h = parseInt(hours) || 0;
     const m = parseInt(minutes) || 0;
     const s = parseInt(seconds) || 0;
     const totalSeconds = h * 3600 + m * 60 + s;
-    onSave({
+    await onSave({
       id: entry.id,
       durationSeconds: totalSeconds,
       date,

@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // Configuración desde variables de entorno (fallback a valores por defecto)
-$host    = getenv('DB_HOST')    ?: 'localhost';
+$host    = getenv('DB_HOST')    ?: '91.242.131.16';
 $port    = getenv('DB_PORT')    ?: '3306';
 $db      = getenv('DB_NAME')    ?: 'mod_tracker_db';
 $user    = getenv('DB_USER')    ?: 'mod_user';

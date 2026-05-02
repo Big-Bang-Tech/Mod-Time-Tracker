@@ -63,7 +63,11 @@ const WeeklyHistoryView: React.FC<WeeklyHistoryViewProps> = ({ currentUser }) =>
       weeks[key].projects[log.projectName] = (weeks[key].projects[log.projectName] || 0) + log.durationSeconds;
     });
 
-    return Object.entries(weeks).sort((a, b) => b[0].localeCompare(a[0]));
+    return Object.entries(weeks).sort((a, b) => {
+      const [aYear, aWeek] = a[0].split('-W').map(Number);
+      const [bYear, bWeek] = b[0].split('-W').map(Number);
+      return bYear - aYear || bWeek - aWeek;
+    });
   };
 
   const filteredUsers = currentUser.role === Role.ADMIN ? data.users : data.users.filter((u) => u.id === currentUser.id);

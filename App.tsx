@@ -144,16 +144,21 @@ const App: React.FC = () => {
     localStorage.setItem('mod_tracker_session', JSON.stringify(user));
   };
 
+  const lastCommittedDateRef = useRef<string | null>(null);
+
   const commitDailyLogs = useCallback(async () => {
     if (!currentUser) return;
     if (isCommittingRef.current) return;
     isCommittingRef.current = true;
 
     try {
+      const today = new Date().toDateString();
+
+      if (lastCommittedDateRef.current === today) return;
+
       const projectsToCommit = projectsRef.current.filter(p => p.currentDaySeconds > 0);
       if (projectsToCommit.length === 0) return;
 
-      const today = new Date().toDateString();
       const committedIds = new Set<string>();
 
       for (const project of projectsToCommit) {
@@ -187,6 +192,8 @@ const App: React.FC = () => {
       }
 
       if (committedIds.size > 0) {
+        lastCommittedDateRef.current = today;
+
         setProjects(prev => prev.map(p =>
           committedIds.has(p.id)
             ? { ...p, status: 'Active' as const, runningSince: null, currentDaySeconds: 0, sessionComment: undefined }

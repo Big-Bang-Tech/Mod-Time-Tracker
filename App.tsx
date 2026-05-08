@@ -624,13 +624,13 @@ const ManualTimeModal: React.FC<{ projects: Project[]; onClose: () => void; onSa
 
   return (
     <div className="fixed inset-0 bg-mod-dark/95 backdrop-blur-md z-[200] flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-mod-card border border-white/20 w-full max-w-md p-8 shadow-[0_0_50px_rgba(0,163,224,0.1)]" onClick={e => e.stopPropagation()}>
+      <div className="bg-mod-card border border-mod-fg/20 w-full max-w-md p-8 shadow-[0_0_50px_rgba(0,163,224,0.1)]" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-8">
-          <h3 className="text-white font-black uppercase tracking-[0.3em] text-xs flex items-center gap-2">
+          <h3 className="text-mod-fg font-black uppercase tracking-[0.3em] text-xs flex items-center gap-2">
             <span className="material-symbols-outlined text-mod-blue">history_edu</span>
             {title}
           </h3>
-          <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-slate-500 hover:text-mod-fg transition-colors">
              <span className="material-symbols-outlined">close</span>
           </button>
         </div>
@@ -638,7 +638,7 @@ const ManualTimeModal: React.FC<{ projects: Project[]; onClose: () => void; onSa
         <div className="space-y-8">
           <div>
             <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2">Nodo del Sistema</label>
-            <select value={selId} tabIndex={1} onChange={e=>setSelId(e.target.value)} className="w-full bg-mod-dark border border-mod-border text-white p-4 font-mono text-sm outline-none focus:border-mod-blue">
+            <select value={selId} tabIndex={1} onChange={e=>setSelId(e.target.value)} className="w-full bg-mod-dark border border-mod-border text-mod-fg p-4 font-mono text-sm outline-none focus:border-mod-blue">
               {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </div>
@@ -647,9 +647,9 @@ const ManualTimeModal: React.FC<{ projects: Project[]; onClose: () => void; onSa
             <div>
               <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2">Unidades Temporales (HH:MM)</label>
               <div className="flex items-center gap-3">
-                <input autoFocus type="text" tabIndex={2} value={hours} onChange={handleHoursChange} placeholder="00" className="w-full bg-mod-dark border border-mod-border text-white text-center p-4 text-3xl font-mono focus:border-mod-blue outline-none" />
+                <input autoFocus type="text" tabIndex={2} value={hours} onChange={handleHoursChange} placeholder="00" className="w-full bg-mod-dark border border-mod-border text-mod-fg text-center p-4 text-3xl font-mono focus:border-mod-blue outline-none" />
                 <span className="text-2xl font-mono text-mod-blue">:</span>
-                <input ref={minInputRef} type="text" tabIndex={3} value={minutes} onChange={handleMinutesChange} placeholder="00" className="w-full bg-mod-dark border border-mod-border text-white text-center p-4 text-3xl font-mono focus:border-mod-blue outline-none" />
+                <input ref={minInputRef} type="text" tabIndex={3} value={minutes} onChange={handleMinutesChange} placeholder="00" className="w-full bg-mod-dark border border-mod-border text-mod-fg text-center p-4 text-3xl font-mono focus:border-mod-blue outline-none" />
               </div>
             </div>
 
@@ -662,13 +662,13 @@ const ManualTimeModal: React.FC<{ projects: Project[]; onClose: () => void; onSa
                   tabIndex={4}
                   max={new Date().toISOString().split('T')[0]}
                   onChange={e => setDate(e.target.value)} 
-                  className="w-full h-[68px] bg-mod-dark border border-mod-border text-white text-center px-2 font-mono text-xs focus:border-mod-blue outline-none uppercase" 
+                  className="w-full h-[68px] bg-mod-dark border border-mod-border text-mod-fg text-center px-2 font-mono text-xs focus:border-mod-blue outline-none uppercase" 
                 />
               </div>
             )}
           </div>
 
-          <button tabIndex={5} onClick={handleSave} className="w-full bg-white text-mod-dark py-5 font-black uppercase text-[10px] tracking-[0.4em] hover:bg-mod-blue hover:text-white transition-all shadow-xl active:scale-95">Inyectar en Base de Datos</button>
+          <button tabIndex={5} onClick={handleSave} className="w-full bg-mod-fg text-mod-dark py-5 font-black uppercase text-[10px] tracking-[0.4em] hover:bg-mod-blue hover:text-mod-fg transition-all shadow-xl active:scale-95">Inyectar en Base de Datos</button>
         </div>
       </div>
     </div>
@@ -679,17 +679,17 @@ const ProjectModal: React.FC<{ project: Project | null; onClose: () => void; onS
   const [formData, setFormData] = useState({ name: project?.name || '', category: project?.category || '', color: project?.color || VIBRANT_COLORS[0] });
   return (
     <div className="fixed inset-0 bg-mod-dark/95 backdrop-blur-md z-[200] flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-mod-card border border-white/20 w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
-        <h3 className="text-white font-black uppercase tracking-widest text-xs mb-6">{project ? 'Modificar' : 'Crear'} Unidad</h3>
+      <div className="bg-mod-card border border-mod-fg/20 w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
+        <h3 className="text-mod-fg font-black uppercase tracking-widest text-xs mb-6">{project ? 'Modificar' : 'Crear'} Unidad</h3>
         <div className="space-y-4">
-          <input autoFocus value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value.toUpperCase()})} className="w-full bg-mod-dark border border-mod-border text-white p-3 font-mono" placeholder="ID_UNIDAD" />
-          <input value={formData.category} onChange={e=>setFormData({...formData, category: e.target.value})} className="w-full bg-mod-dark border border-mod-border text-white p-3" placeholder="CATEGORÍA" />
+          <input autoFocus value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value.toUpperCase()})} className="w-full bg-mod-dark border border-mod-border text-mod-fg p-3 font-mono" placeholder="ID_UNIDAD" />
+          <input value={formData.category} onChange={e=>setFormData({...formData, category: e.target.value})} className="w-full bg-mod-dark border border-mod-border text-mod-fg p-3" placeholder="CATEGORÍA" />
           <div className="grid grid-cols-5 gap-2">
             {VIBRANT_COLORS.map(c => (
-              <button key={c} onClick={()=>setFormData({...formData, color: c})} className={`h-8 ${c} border ${formData.color === c ? 'border-white scale-110' : 'border-transparent opacity-50'} transition-all`} />
+              <button key={c} onClick={()=>setFormData({...formData, color: c})} className={`h-8 ${c} border ${formData.color === c ? 'border-mod-fg scale-110' : 'border-transparent opacity-50'} transition-all`} />
             ))}
           </div>
-          <button onClick={() => onSave(formData)} className="w-full bg-white text-mod-dark py-4 font-black uppercase text-[10px] tracking-widest">Confirmar</button>
+          <button onClick={() => onSave(formData)} className="w-full bg-mod-fg text-mod-dark py-4 font-black uppercase text-[10px] tracking-widest">Confirmar</button>
         </div>
       </div>
     </div>

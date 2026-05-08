@@ -135,14 +135,14 @@ const AdminUserDetailView: React.FC<AdminUserDetailViewProps> = ({ user, onBack,
       <div className="mb-10 flex items-center gap-6 border-b border-mod-border pb-8">
         <button
           onClick={onBack}
-          className="w-12 h-12 flex items-center justify-center border border-mod-border text-slate-500 hover:text-white hover:border-white transition-all"
+          className="w-12 h-12 flex items-center justify-center border border-mod-border text-slate-500 hover:text-mod-fg hover:border-mod-fg transition-all"
         >
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
         <div className="flex items-center gap-4">
           <img src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${user.avatarSeed}`} className="w-16 h-16 border border-mod-border bg-mod-card p-1" alt="" />
           <div>
-            <h2 className="text-4xl font-black tracking-tighter text-white uppercase italic">INSPECCIÓN <span className="text-slate-500 font-light not-italic">{user.username}</span></h2>
+            <h2 className="text-4xl font-black tracking-tighter text-mod-fg uppercase italic">INSPECCIÓN <span className="text-slate-500 font-light not-italic">{user.username}</span></h2>
             <p className="text-[10px] text-mod-blue font-bold uppercase tracking-[0.3em] mt-1">Status: Conexión Activa | ID: {user.id}</p>
           </div>
         </div>
@@ -151,15 +151,15 @@ const AdminUserDetailView: React.FC<AdminUserDetailViewProps> = ({ user, onBack,
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-10">
         <div className="bg-mod-card border border-mod-border p-8">
           <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-4">Uptime Total Acumulado</p>
-          <p className="text-3xl text-white font-black font-mono">{formatTimeFull(totalTimeSeconds)}</p>
+          <p className="text-3xl text-mod-fg font-black font-mono">{formatTimeFull(totalTimeSeconds)}</p>
         </div>
         <div className="bg-mod-card border border-mod-border p-8">
           <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-4">Unidades de Trabajo</p>
-          <p className="text-3xl text-white font-black font-mono">{projects.length}</p>
+          <p className="text-3xl text-mod-fg font-black font-mono">{projects.length}</p>
         </div>
         <div className="bg-mod-card border border-mod-border p-8">
           <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-4">Última Sincronización</p>
-          <p className="text-lg text-white font-bold uppercase">{user.lastLogin === '-' || !user.lastLogin ? 'NUNCA' : new Date(user.lastLogin).toLocaleDateString()}</p>
+          <p className="text-lg text-mod-fg font-bold uppercase">{user.lastLogin === '-' || !user.lastLogin ? 'NUNCA' : new Date(user.lastLogin).toLocaleDateString()}</p>
         </div>
         <div className="bg-mod-card border border-red-600/30 p-8">
           <p className="text-red-500/50 text-[9px] font-black uppercase tracking-widest mb-4">Protocolo de Seguridad</p>
@@ -169,7 +169,7 @@ const AdminUserDetailView: React.FC<AdminUserDetailViewProps> = ({ user, onBack,
 
       {/* Gráfico circular: inversión temporal por proyecto */}
       <div className="bg-mod-card border border-mod-border p-8 mb-10">
-        <h3 className="text-white text-xs font-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+        <h3 className="text-mod-fg text-xs font-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
           <span className="material-symbols-outlined text-mod-blue text-sm">donut_large</span>
           Inversión Temporal por Proyecto
         </h3>
@@ -184,8 +184,8 @@ const AdminUserDetailView: React.FC<AdminUserDetailViewProps> = ({ user, onBack,
               <div key={i}>
                 <div className="flex justify-between text-[9px] font-black uppercase tracking-widest mb-1">
                   <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 ${p.color} border border-white/10`}></div>
-                    <span className="text-white truncate max-w-[200px]">{p.name}</span>
+                    <div className={`w-2 h-2 ${p.color} border border-mod-fg/10`}></div>
+                    <span className="text-mod-fg truncate max-w-[200px]">{p.name}</span>
                   </div>
                   <span className="text-mod-blue font-mono">{p.percent.toFixed(1)}% · {formatTimeFull(p.seconds)}</span>
                 </div>
@@ -204,7 +204,7 @@ const AdminUserDetailView: React.FC<AdminUserDetailViewProps> = ({ user, onBack,
       {/* Suma total de tiempos por proyecto */}
       <div className="bg-mod-card border border-mod-border mb-10">
         <div className="p-6 bg-mod-dark border-b border-mod-border flex items-center justify-between">
-          <h3 className="text-white text-xs font-black uppercase tracking-[0.2em]">Despliegue de Proyectos · Suma Total por Unidad</h3>
+          <h3 className="text-mod-fg text-xs font-black uppercase tracking-[0.2em]">Despliegue de Proyectos · Suma Total por Unidad</h3>
           <span className="material-symbols-outlined text-slate-600 text-sm">layers</span>
         </div>
         <div className="divide-y divide-mod-border">
@@ -212,12 +212,12 @@ const AdminUserDetailView: React.FC<AdminUserDetailViewProps> = ({ user, onBack,
             <div
               key={p.id}
               onClick={() => onProjectClick?.(p.id)}
-              className={`p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors group ${onProjectClick ? 'cursor-pointer hover:border-l-2 hover:border-l-mod-blue' : ''}`}
+              className={`p-6 flex items-center justify-between hover:bg-mod-fg/[0.02] transition-colors group ${onProjectClick ? 'cursor-pointer hover:border-l-2 hover:border-l-mod-blue' : ''}`}
             >
               <div className="flex items-center gap-4">
                 <div className={`w-3 h-3 ${p.color}`}></div>
                 <div>
-                  <p className="text-white font-bold uppercase text-sm">{p.name}</p>
+                  <p className="text-mod-fg font-bold uppercase text-sm">{p.name}</p>
                   <p className="text-[10px] text-slate-500 font-mono">ID: {p.id}</p>
                 </div>
               </div>
@@ -238,7 +238,7 @@ const AdminUserDetailView: React.FC<AdminUserDetailViewProps> = ({ user, onBack,
       {/* Registros de sincronización con paginación y filtros */}
       <div className="bg-mod-card border border-mod-border">
         <div className="p-6 bg-mod-dark border-b border-mod-border flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between gap-4">
-          <h3 className="text-white text-xs font-black uppercase tracking-[0.2em] flex items-center gap-2">
+          <h3 className="text-mod-fg text-xs font-black uppercase tracking-[0.2em] flex items-center gap-2">
             <span className="material-symbols-outlined text-slate-600 text-sm">history</span>
             Registros de Sincronización
           </h3>
@@ -246,7 +246,7 @@ const AdminUserDetailView: React.FC<AdminUserDetailViewProps> = ({ user, onBack,
             <select
               value={filterProjectId}
               onChange={e => { setFilterProjectId(e.target.value); setPage(0); }}
-              className="bg-mod-dark border border-mod-border text-[10px] font-bold uppercase text-white px-3 py-2 outline-none focus:border-mod-blue cursor-pointer"
+              className="bg-mod-dark border border-mod-border text-[10px] font-bold uppercase text-mod-fg px-3 py-2 outline-none focus:border-mod-blue cursor-pointer"
             >
               <option value="ALL">Todos los proyectos</option>
               {projectTotals.map(p => (
@@ -257,14 +257,14 @@ const AdminUserDetailView: React.FC<AdminUserDetailViewProps> = ({ user, onBack,
               type="date"
               value={filterDateFrom}
               onChange={e => { setFilterDateFrom(e.target.value); setPage(0); }}
-              className="bg-mod-dark border border-mod-border text-[10px] font-mono text-white px-3 py-2 outline-none focus:border-mod-blue"
+              className="bg-mod-dark border border-mod-border text-[10px] font-mono text-mod-fg px-3 py-2 outline-none focus:border-mod-blue"
               placeholder="Desde"
             />
             <input
               type="date"
               value={filterDateTo}
               onChange={e => { setFilterDateTo(e.target.value); setPage(0); }}
-              className="bg-mod-dark border border-mod-border text-[10px] font-mono text-white px-3 py-2 outline-none focus:border-mod-blue"
+              className="bg-mod-dark border border-mod-border text-[10px] font-mono text-mod-fg px-3 py-2 outline-none focus:border-mod-blue"
               placeholder="Hasta"
             />
           </div>
@@ -281,9 +281,9 @@ const AdminUserDetailView: React.FC<AdminUserDetailViewProps> = ({ user, onBack,
             </thead>
             <tbody className="divide-y divide-mod-border">
               {paginatedLogs.map(log => (
-                <tr key={log.id} className="hover:bg-white/[0.02]">
+                <tr key={log.id} className="hover:bg-mod-fg/[0.02]">
                   <td className="px-6 py-4 text-slate-500 font-mono uppercase">{log.date}</td>
-                  <td className="px-6 py-4 text-white font-bold uppercase">{log.projectName}</td>
+                  <td className="px-6 py-4 text-mod-fg font-bold uppercase">{log.projectName}</td>
                   <td className="px-6 py-4 text-right text-mod-blue font-mono">{formatTimeFull(log.durationSeconds)}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-0.5 text-[8px] font-black uppercase tracking-widest border ${
@@ -309,15 +309,15 @@ const AdminUserDetailView: React.FC<AdminUserDetailViewProps> = ({ user, onBack,
               <button
                 onClick={() => setPage(p => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="w-10 h-10 flex items-center justify-center border border-mod-border text-slate-500 hover:text-white hover:border-white transition-all disabled:opacity-30 disabled:pointer-events-none"
+                className="w-10 h-10 flex items-center justify-center border border-mod-border text-slate-500 hover:text-mod-fg hover:border-mod-fg transition-all disabled:opacity-30 disabled:pointer-events-none"
               >
                 <span className="material-symbols-outlined text-lg">chevron_left</span>
               </button>
-              <span className="text-[10px] font-mono text-white font-bold px-2">Pág. {page + 1} / {totalPages}</span>
+              <span className="text-[10px] font-mono text-mod-fg font-bold px-2">Pág. {page + 1} / {totalPages}</span>
               <button
                 onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
-                className="w-10 h-10 flex items-center justify-center border border-mod-border text-slate-500 hover:text-white hover:border-white transition-all disabled:opacity-30 disabled:pointer-events-none"
+                className="w-10 h-10 flex items-center justify-center border border-mod-border text-slate-500 hover:text-mod-fg hover:border-mod-fg transition-all disabled:opacity-30 disabled:pointer-events-none"
               >
                 <span className="material-symbols-outlined text-lg">chevron_right</span>
               </button>

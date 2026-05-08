@@ -120,7 +120,7 @@ const MovementsView: React.FC<MovementsViewProps> = ({ currentUser, onDeleteLog,
         <div className="flex items-center gap-4">
           <span className="material-symbols-outlined text-mod-blue text-4xl">list_alt</span>
           <div>
-            <h2 className="text-4xl font-black tracking-tighter text-white uppercase italic">REGISTRO <span className="text-slate-500 font-light not-italic">MOVIMIENTOS</span></h2>
+            <h2 className="text-4xl font-black tracking-tighter text-mod-fg uppercase italic">REGISTRO <span className="text-slate-500 font-light not-italic">MOVIMIENTOS</span></h2>
             <p className="text-[10px] text-mod-blue font-bold uppercase tracking-[0.3em] mt-1">Archivo Crítico de Sesiones y Cargas Temporales</p>
           </div>
         </div>
@@ -134,7 +134,7 @@ const MovementsView: React.FC<MovementsViewProps> = ({ currentUser, onDeleteLog,
             <select 
               value={filterUser} 
               onChange={e => setFilterUser(e.target.value)}
-              className="bg-mod-dark border border-mod-border text-white text-[10px] font-bold px-4 py-2 outline-none focus:border-mod-blue"
+              className="bg-mod-dark border border-mod-border text-mod-fg text-[10px] font-bold px-4 py-2 outline-none focus:border-mod-blue"
             >
               <option value="ALL">TODOS LOS OPERADORES</option>
               {users.map(u => <option key={u.id} value={u.id}>{u.username}</option>)}
@@ -147,7 +147,7 @@ const MovementsView: React.FC<MovementsViewProps> = ({ currentUser, onDeleteLog,
           <select 
             value={filterProject} 
             onChange={e => setFilterProject(e.target.value)}
-            className="bg-mod-dark border border-mod-border text-white text-[10px] font-bold px-4 py-2 outline-none focus:border-mod-blue"
+            className="bg-mod-dark border border-mod-border text-mod-fg text-[10px] font-bold px-4 py-2 outline-none focus:border-mod-blue"
           >
             <option value="ALL">TODOS LOS PROYECTOS</option>
             {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -160,7 +160,7 @@ const MovementsView: React.FC<MovementsViewProps> = ({ currentUser, onDeleteLog,
             type="date" 
             value={filterDateFrom} 
             onChange={e => setFilterDateFrom(e.target.value)}
-            className="bg-mod-dark border border-mod-border text-white text-[10px] font-bold px-4 py-2 outline-none focus:border-mod-blue"
+            className="bg-mod-dark border border-mod-border text-mod-fg text-[10px] font-bold px-4 py-2 outline-none focus:border-mod-blue"
           />
         </div>
 
@@ -170,13 +170,13 @@ const MovementsView: React.FC<MovementsViewProps> = ({ currentUser, onDeleteLog,
             type="date" 
             value={filterDateTo} 
             onChange={e => setFilterDateTo(e.target.value)}
-            className="bg-mod-dark border border-mod-border text-white text-[10px] font-bold px-4 py-2 outline-none focus:border-mod-blue"
+            className="bg-mod-dark border border-mod-border text-mod-fg text-[10px] font-bold px-4 py-2 outline-none focus:border-mod-blue"
           />
         </div>
 
         <button 
           onClick={() => { setFilterUser(isAdmin ? 'ALL' : currentUser.id); setFilterProject('ALL'); setFilterDateFrom(''); setFilterDateTo(''); }}
-          className="h-10 px-4 border border-mod-border text-slate-500 hover:text-white hover:border-white transition-all text-[10px] font-bold uppercase tracking-widest flex items-center gap-2"
+          className="h-10 px-4 border border-mod-border text-slate-500 hover:text-mod-fg hover:border-mod-fg transition-all text-[10px] font-bold uppercase tracking-widest flex items-center gap-2"
         >
           <span className="material-symbols-outlined text-sm">filter_alt_off</span>
           Reiniciar
@@ -203,18 +203,18 @@ const MovementsView: React.FC<MovementsViewProps> = ({ currentUser, onDeleteLog,
                 
                 return (
                   <React.Fragment key={group.key}>
-                    <tr className={`hover:bg-white/[0.02] transition-colors group ${isExpanded ? 'bg-mod-blue/5' : ''}`}>
+                    <tr className={`hover:bg-mod-fg/[0.02] transition-colors group ${isExpanded ? 'bg-mod-blue/5' : ''}`}>
                       <td className="px-8 py-5 font-mono text-slate-400 uppercase">{group.date}</td>
                       {isAdmin && (
                         <td className="px-8 py-5">
                           <div className="flex items-center gap-3">
                             <img src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${operator?.avatarSeed}`} className="w-6 h-6 border border-mod-border bg-mod-dark p-1" />
-                            <span className="text-white font-bold uppercase">{operator?.username || 'SISTEMA'}</span>
+                            <span className="text-mod-fg font-bold uppercase">{operator?.username || 'SISTEMA'}</span>
                           </div>
                         </td>
                       )}
                       <td className="px-8 py-5">
-                        <span className="text-white font-black uppercase tracking-tight">{group.projectName}</span>
+                        <span className="text-mod-fg font-black uppercase tracking-tight">{group.projectName}</span>
                       </td>
                       <td className="px-8 py-5 max-w-[200px]">
                         {(() => {
@@ -230,7 +230,7 @@ const MovementsView: React.FC<MovementsViewProps> = ({ currentUser, onDeleteLog,
                       <td className="px-8 py-5 text-right">
                         <button 
                           onClick={() => toggleGroup(group.key)}
-                          className={`flex items-center gap-2 ml-auto h-8 px-3 border transition-all text-[9px] font-black uppercase tracking-widest ${isExpanded ? 'bg-mod-blue text-white border-mod-blue' : 'border-mod-border text-slate-500 hover:text-white'}`}
+                          className={`flex items-center gap-2 ml-auto h-8 px-3 border transition-all text-[9px] font-black uppercase tracking-widest ${isExpanded ? 'bg-mod-blue text-mod-fg border-mod-blue' : 'border-mod-border text-slate-500 hover:text-mod-fg'}`}
                         >
                           <span className="material-symbols-outlined text-sm">{isExpanded ? 'keyboard_arrow_up' : 'expand_more'}</span>
                           <span>{group.entries.length > 1 ? `DESGLOSE (${group.entries.length})` : 'DETALLES'}</span>
@@ -254,13 +254,13 @@ const MovementsView: React.FC<MovementsViewProps> = ({ currentUser, onDeleteLog,
                                 </thead>
                                 <tbody className="divide-y divide-mod-border/50">
                                   {group.entries.map((entry) => (
-                                    <tr key={entry.id} className="hover:bg-white/[0.05]">
+                                    <tr key={entry.id} className="hover:bg-mod-fg/[0.05]">
                                       <td className="px-8 py-3 text-slate-500 italic flex items-center gap-2">
                                         {getStatusBadge(entry.status)}
                                         <span className="font-mono text-slate-300 opacity-30">{entry.id}</span>
                                       </td>
                                       <td className="px-8 py-3 text-slate-500">
-                                        <span className="text-white font-mono">{entry.created_at ? new Date(entry.created_at).toLocaleTimeString() : '---'}</span>
+                                        <span className="text-mod-fg font-mono">{entry.created_at ? new Date(entry.created_at).toLocaleTimeString() : '---'}</span>
                                       </td>
                                       <td className="px-8 py-3 text-slate-300 max-w-[280px]">
                                         {entry.comment ? <span title={entry.comment}>💬 {entry.comment}</span> : <span className="text-slate-600 italic">—</span>}
@@ -273,7 +273,7 @@ const MovementsView: React.FC<MovementsViewProps> = ({ currentUser, onDeleteLog,
                                           {onEditLog && (
                                             <button
                                               onClick={() => setEditingLog(entry)}
-                                              className="text-mod-blue hover:text-white hover:bg-mod-blue w-8 h-8 flex items-center justify-center transition-all"
+                                              className="text-mod-blue hover:text-mod-fg hover:bg-mod-blue w-8 h-8 flex items-center justify-center transition-all"
                                               title="Editar movimiento"
                                             >
                                               <span className="material-symbols-outlined text-sm">edit</span>
@@ -282,7 +282,7 @@ const MovementsView: React.FC<MovementsViewProps> = ({ currentUser, onDeleteLog,
                                           {isAdmin && (
                                             <button
                                               onClick={() => openHistory(entry.id)}
-                                              className="text-amber-500 hover:text-white hover:bg-amber-600 w-8 h-8 flex items-center justify-center transition-all"
+                                              className="text-amber-500 hover:text-mod-fg hover:bg-amber-600 w-8 h-8 flex items-center justify-center transition-all"
                                               title="Historial de modificaciones"
                                             >
                                               <span className="material-symbols-outlined text-sm">history</span>
@@ -290,7 +290,7 @@ const MovementsView: React.FC<MovementsViewProps> = ({ currentUser, onDeleteLog,
                                           )}
                                           <button 
                                             onClick={() => { if(confirm('¿Eliminar esta sesión individual?')) { onDeleteLog(entry.id); setTimeout(loadData, 300); } }}
-                                            className="text-red-500 hover:text-white hover:bg-red-600 w-8 h-8 flex items-center justify-center transition-all"
+                                            className="text-red-500 hover:text-mod-fg hover:bg-red-600 w-8 h-8 flex items-center justify-center transition-all"
                                             title="Borrar Sesión"
                                           >
                                             <span className="material-symbols-outlined text-sm">delete</span>
@@ -385,11 +385,11 @@ const EditLogModal: React.FC<{
     <div className="fixed inset-0 bg-mod-dark/95 backdrop-blur-md z-[200] flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-mod-card border border-mod-border w-full max-w-md p-6 shadow-xl" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-white font-black uppercase tracking-widest text-xs flex items-center gap-2">
+          <h3 className="text-mod-fg font-black uppercase tracking-widest text-xs flex items-center gap-2">
             <span className="material-symbols-outlined text-mod-blue">edit</span>
             Editar movimiento
           </h3>
-          <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-slate-500 hover:text-mod-fg transition-colors">
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>
@@ -397,24 +397,24 @@ const EditLogModal: React.FC<{
           <div>
             <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Duración (HH:MM:SS)</label>
             <div className="flex items-center gap-2">
-              <input type="text" value={hours} onChange={e => setHours(e.target.value.replace(/\D/g, '').slice(0, 2))} placeholder="00" className="w-16 bg-mod-dark border border-mod-border text-white text-center py-2 font-mono outline-none focus:border-mod-blue" />
+              <input type="text" value={hours} onChange={e => setHours(e.target.value.replace(/\D/g, '').slice(0, 2))} placeholder="00" className="w-16 bg-mod-dark border border-mod-border text-mod-fg text-center py-2 font-mono outline-none focus:border-mod-blue" />
               <span className="text-mod-blue">:</span>
-              <input type="text" value={minutes} onChange={e => setMinutes(e.target.value.replace(/\D/g, '').slice(0, 2))} placeholder="00" className="w-16 bg-mod-dark border border-mod-border text-white text-center py-2 font-mono outline-none focus:border-mod-blue" />
+              <input type="text" value={minutes} onChange={e => setMinutes(e.target.value.replace(/\D/g, '').slice(0, 2))} placeholder="00" className="w-16 bg-mod-dark border border-mod-border text-mod-fg text-center py-2 font-mono outline-none focus:border-mod-blue" />
               <span className="text-mod-blue">:</span>
-              <input type="text" value={seconds} onChange={e => setSeconds(e.target.value.replace(/\D/g, '').slice(0, 2))} placeholder="00" className="w-16 bg-mod-dark border border-mod-border text-white text-center py-2 font-mono outline-none focus:border-mod-blue" />
+              <input type="text" value={seconds} onChange={e => setSeconds(e.target.value.replace(/\D/g, '').slice(0, 2))} placeholder="00" className="w-16 bg-mod-dark border border-mod-border text-mod-fg text-center py-2 font-mono outline-none focus:border-mod-blue" />
             </div>
           </div>
           <div>
             <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Fecha</label>
-            <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full bg-mod-dark border border-mod-border text-white py-2 px-3 font-mono outline-none focus:border-mod-blue" />
+            <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full bg-mod-dark border border-mod-border text-mod-fg py-2 px-3 font-mono outline-none focus:border-mod-blue" />
           </div>
           <div>
             <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Comentario</label>
-            <input type="text" value={comment} onChange={e => setComment(e.target.value)} placeholder="Opcional" className="w-full bg-mod-dark border border-mod-border text-white py-2 px-3 outline-none focus:border-mod-blue" />
+            <input type="text" value={comment} onChange={e => setComment(e.target.value)} placeholder="Opcional" className="w-full bg-mod-dark border border-mod-border text-mod-fg py-2 px-3 outline-none focus:border-mod-blue" />
           </div>
           <div className="flex gap-2 pt-2">
-            <button onClick={onClose} className="flex-1 border border-mod-border text-slate-400 py-2 text-[10px] font-black uppercase tracking-widest hover:text-white hover:border-white transition-all">Cancelar</button>
-            <button onClick={handleSave} className="flex-1 bg-mod-blue text-white py-2 text-[10px] font-black uppercase tracking-widest hover:bg-mod-blue/80 transition-all">Guardar</button>
+            <button onClick={onClose} className="flex-1 border border-mod-border text-slate-400 py-2 text-[10px] font-black uppercase tracking-widest hover:text-mod-fg hover:border-mod-fg transition-all">Cancelar</button>
+            <button onClick={handleSave} className="flex-1 bg-mod-blue text-mod-fg py-2 text-[10px] font-black uppercase tracking-widest hover:bg-mod-blue/80 transition-all">Guardar</button>
           </div>
         </div>
       </div>
@@ -433,11 +433,11 @@ const HistoryModal: React.FC<{
     <div className="fixed inset-0 bg-mod-dark/95 backdrop-blur-md z-[200] flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-mod-card border border-mod-border w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col shadow-xl" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center p-6 border-b border-mod-border">
-          <h3 className="text-white font-black uppercase tracking-widest text-xs flex items-center gap-2">
+          <h3 className="text-mod-fg font-black uppercase tracking-widest text-xs flex items-center gap-2">
             <span className="material-symbols-outlined text-amber-500">history</span>
             Historial de modificaciones
           </h3>
-          <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-slate-500 hover:text-mod-fg transition-colors">
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>

@@ -85,7 +85,7 @@ const WeeklyHistoryView: React.FC<WeeklyHistoryViewProps> = ({ currentUser }) =>
         <div className="flex items-center gap-4">
           <span className="material-symbols-outlined text-mod-blue text-4xl">history</span>
           <div>
-            <h2 className="text-4xl font-black tracking-tighter text-white uppercase italic">
+            <h2 className="text-4xl font-black tracking-tighter text-mod-fg uppercase italic">
               CRONOGRAMA <span className="text-slate-500 font-light not-italic">OPERATIVO</span>
             </h2>
             <p className="text-[10px] text-mod-blue font-bold uppercase tracking-[0.3em] mt-1">
@@ -105,7 +105,7 @@ const WeeklyHistoryView: React.FC<WeeklyHistoryViewProps> = ({ currentUser }) =>
                 className="w-12 h-12 border border-mod-border bg-mod-dark p-1"
               />
               <div>
-                <h3 className="text-xl font-black text-white uppercase tracking-tighter">{user.username}</h3>
+                <h3 className="text-xl font-black text-mod-fg uppercase tracking-tighter">{user.username}</h3>
                 <p className="text-[9px] text-slate-500 font-bold uppercase tracking-[0.3em]">{user.role}</p>
               </div>
             </div>
@@ -120,7 +120,7 @@ const WeeklyHistoryView: React.FC<WeeklyHistoryViewProps> = ({ currentUser }) =>
                     type="button"
                     onClick={() => setSelectedWeek(isSelected ? null : { userId: user.id, key })}
                     className={`text-left p-5 border transition-all hover:border-mod-blue/50 ${
-                      isSelected ? 'border-mod-blue bg-mod-blue/10' : 'border-mod-border hover:bg-white/[0.02]'
+                      isSelected ? 'border-mod-blue bg-mod-blue/10' : 'border-mod-border hover:bg-mod-fg/[0.02]'
                     }`}
                   >
                     <div className="text-mod-blue text-[9px] font-black uppercase tracking-widest mb-1">
@@ -129,7 +129,7 @@ const WeeklyHistoryView: React.FC<WeeklyHistoryViewProps> = ({ currentUser }) =>
                     <div className="text-slate-400 text-[10px] font-mono mb-2">
                       {range.start.toLocaleDateString()} – {range.end.toLocaleDateString()}
                     </div>
-                    <div className="text-white font-mono font-black text-lg">{formatTime(week.total)}</div>
+                    <div className="text-mod-fg font-mono font-black text-lg">{formatTime(week.total)}</div>
                   </button>
                 );
               })}
@@ -154,13 +154,13 @@ const WeeklyHistoryView: React.FC<WeeklyHistoryViewProps> = ({ currentUser }) =>
               onClick={(e) => e.stopPropagation()}
             >
               <div className="sticky top-0 bg-mod-card border-b border-mod-border p-6 flex justify-between items-center">
-                <h4 className="text-white font-black uppercase tracking-widest">
+                <h4 className="text-mod-fg font-black uppercase tracking-widest">
                   Semana {weekDetail.weekNum} · {weekDetail.year}
                 </h4>
                 <button
                   type="button"
                   onClick={() => setSelectedWeek(null)}
-                  className="w-10 h-10 flex items-center justify-center border border-mod-border hover:border-white text-slate-500 hover:text-white transition-all"
+                  className="w-10 h-10 flex items-center justify-center border border-mod-border hover:border-mod-fg text-slate-500 hover:text-mod-fg transition-all"
                 >
                   <span className="material-symbols-outlined">close</span>
                 </button>
@@ -168,7 +168,7 @@ const WeeklyHistoryView: React.FC<WeeklyHistoryViewProps> = ({ currentUser }) =>
               <div className="p-6">
                 <div className="mb-6">
                   <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-1">Rango</p>
-                  <p className="text-white font-mono text-sm">{range.start.toLocaleDateString()} – {range.end.toLocaleDateString()}</p>
+                  <p className="text-mod-fg font-mono text-sm">{range.start.toLocaleDateString()} – {range.end.toLocaleDateString()}</p>
                 </div>
                 <div className="mb-6">
                   <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-1">Total</p>
@@ -179,7 +179,7 @@ const WeeklyHistoryView: React.FC<WeeklyHistoryViewProps> = ({ currentUser }) =>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {Object.entries(weekDetail.projects).map(([name, seconds]) => (
                       <div key={name} className="flex justify-between items-center p-3 border border-mod-border bg-mod-dark/50">
-                        <span className="text-white text-[10px] font-bold uppercase truncate pr-2">{name}</span>
+                        <span className="text-mod-fg text-[10px] font-bold uppercase truncate pr-2">{name}</span>
                         <span className="text-mod-blue font-mono font-bold text-xs shrink-0">{formatTime(seconds)}</span>
                       </div>
                     ))}

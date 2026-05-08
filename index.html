@@ -1,16 +1,31 @@
 
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MOD Tracker - Vibrant Grid</title>
+    <script>
+        // Anti-flash: aplica el tema antes de que cargue React/Tailwind
+        (function() {
+            try {
+                var stored = localStorage.getItem('mod_tracker_theme');
+                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var resolved = stored === 'light' ? 'light'
+                              : stored === 'dark' ? 'dark'
+                              : (prefersDark ? 'dark' : 'light');
+                if (resolved === 'dark') document.documentElement.classList.add('dark');
+            } catch (e) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <script>
         window.process = { env: { API_KEY: "" } };
-        
+
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -19,12 +34,14 @@
                         'sidebar': '1366px',
                     },
                     colors: {
-                        "primary": "#00a3e0",
-                        "mod-blue": "#00a3e0",
-                        "mod-dark": "#05070a",
-                        "mod-card": "#0d1117",
-                        "mod-border": "#1f2937",
-                        "background-dark": "#020408",
+                        "primary": "rgb(var(--mod-blue) / <alpha-value>)",
+                        "mod-blue": "rgb(var(--mod-blue) / <alpha-value>)",
+                        "mod-dark": "rgb(var(--mod-dark) / <alpha-value>)",
+                        "mod-card": "rgb(var(--mod-card) / <alpha-value>)",
+                        "mod-border": "rgb(var(--mod-border) / <alpha-value>)",
+                        "background-dark": "rgb(var(--background-dark) / <alpha-value>)",
+                        "mod-fg": "rgb(var(--mod-fg) / <alpha-value>)",
+                        "mod-fg-muted": "rgb(var(--mod-fg-muted) / <alpha-value>)",
                     },
                     fontFamily: {
                         "sans": ["Inter", "sans-serif"],
@@ -36,10 +53,31 @@
         }
     </script>
     <style type="text/tailwindcss">
+        :root {
+            --mod-blue: 0 163 224;
+            --mod-dark: 255 255 255;
+            --mod-card: 255 255 255;
+            --mod-border: 203 213 225;
+            --background-dark: 226 232 240;
+            --mod-fg: 15 23 42;
+            --mod-fg-muted: 71 85 105;
+            --scrollbar-track: #e2e8f0;
+            --scrollbar-thumb: #94a3b8;
+        }
+        :root.dark {
+            --mod-dark: 5 7 10;
+            --mod-card: 13 17 23;
+            --mod-border: 31 41 55;
+            --background-dark: 2 4 8;
+            --mod-fg: 255 255 255;
+            --mod-fg-muted: 148 163 184;
+            --scrollbar-track: #05070a;
+            --scrollbar-thumb: #1f2937;
+        }
         @layer components {
             .active-project-card {
-                @apply border-4 border-white z-10 scale-[1.02] !important;
-                box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+                @apply border-4 border-mod-fg z-10 scale-[1.02] !important;
+                box-shadow: 0 0 30px rgb(var(--mod-fg) / 0.3);
             }
             .vibrant-red { background-color: #e63946; stroke: #e63946; border-color: #e63946; color: #e63946; }
             .vibrant-blue { background-color: #457b9d; stroke: #457b9d; border-color: #457b9d; color: #457b9d; }
@@ -66,13 +104,13 @@
         }
         
         body {
-            @apply bg-mod-dark text-white font-sans;
+            @apply bg-mod-dark text-mod-fg font-sans;
             scrollbar-width: thin;
-            scrollbar-color: #1f2937 #05070a;
+            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
         }
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #05070a; }
-        ::-webkit-scrollbar-thumb { background: #1f2937; }
+        ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); }
 
         .material-symbols-outlined {
           font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;

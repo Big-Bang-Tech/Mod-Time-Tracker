@@ -59,12 +59,12 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, onEditProject }) =>
     <div className="p-10 max-w-[1400px] mx-auto">
       <div className="mb-10 flex items-end justify-between">
         <div>
-          <h2 className="text-4xl font-light tracking-tighter text-white">REGISTRO DE <span className="font-bold">PROYECTOS</span></h2>
+          <h2 className="text-4xl font-light tracking-tighter text-mod-fg">REGISTRO DE <span className="font-bold">PROYECTOS</span></h2>
           <div className="h-1 w-20 bg-mod-blue mt-2"></div>
         </div>
         <button 
           onClick={handleExportCurrentProjects}
-          className="flex items-center gap-2 h-10 px-6 border border-mod-border bg-transparent text-slate-400 text-[10px] font-bold uppercase tracking-widest hover:bg-white hover:text-mod-dark transition-all"
+          className="flex items-center gap-2 h-10 px-6 border border-mod-border bg-transparent text-slate-400 text-[10px] font-bold uppercase tracking-widest hover:bg-mod-fg hover:text-mod-dark transition-all"
         >
           <span className="material-symbols-outlined text-sm">download</span>
           <span>Generar CSV</span>
@@ -84,7 +84,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, onEditProject }) =>
           </thead>
           <tbody className="divide-y divide-mod-border">
             {projects.map((project) => (
-              <tr key={project.id} className="hover:bg-white/5 transition-colors group">
+              <tr key={project.id} className="hover:bg-mod-fg/5 transition-colors group">
                 <td className="px-8 py-5">
                   <div className="flex items-center gap-3">
                     <div className={`w-2 h-2 ${project.color}`}></div>
@@ -93,7 +93,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, onEditProject }) =>
                 </td>
                 <td className="px-8 py-5">
                   <div className="flex flex-col">
-                    <span className="text-white font-black uppercase tracking-tight text-sm">{project.name}</span>
+                    <span className="text-mod-fg font-black uppercase tracking-tight text-sm">{project.name}</span>
                     <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{project.category}</span>
                   </div>
                 </td>
@@ -109,7 +109,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, onEditProject }) =>
                 <td className="px-8 py-5 text-right">
                   <button 
                     onClick={() => onEditProject(project)}
-                    className="text-mod-blue hover:text-white font-bold uppercase text-[10px] tracking-widest transition-all"
+                    className="text-mod-blue hover:text-mod-fg font-bold uppercase text-[10px] tracking-widest transition-all"
                   >
                     CONFIG
                   </button>

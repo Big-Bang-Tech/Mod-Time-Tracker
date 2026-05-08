@@ -89,10 +89,10 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({
   return (
     <div className="p-4 lg:p-10 max-w-[1400px] mx-auto animate-in fade-in duration-500">
       <div className="mb-6 lg:mb-10 flex items-center justify-between">
-        <h2 className="text-xl lg:text-4xl font-light text-white uppercase tracking-tighter">GRID <span className="font-bold">MOD</span></h2>
+        <h2 className="text-xl lg:text-4xl font-light text-mod-fg uppercase tracking-tighter">GRID <span className="font-bold">MOD</span></h2>
         <button 
           onClick={onToggleShowHidden}
-          className={`flex items-center gap-2 px-3 py-1.5 border text-[8px] font-black uppercase tracking-widest ${showHidden ? 'bg-white text-mod-dark border-white' : 'bg-transparent text-slate-500 border-mod-border'}`}
+          className={`flex items-center gap-2 px-3 py-1.5 border text-[8px] font-black uppercase tracking-widest ${showHidden ? 'bg-mod-fg text-mod-dark border-mod-fg' : 'bg-transparent text-slate-500 border-mod-border'}`}
         >
           <span className="material-symbols-outlined text-[12px]">{showHidden ? 'visibility' : 'visibility_off'}</span>
           <span className="hidden sm:inline">{showHidden ? 'Ocultar' : 'Ver Todos'}</span>
@@ -116,18 +116,18 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({
               className={`
                 group relative flex flex-col justify-between aspect-square p-4 lg:p-5 xl:p-8 cursor-pointer transition-all duration-300
                 ${project.color} ${isRunning ? 'active-project-card scale-[1.03]' : 'opacity-90 hover:brightness-110'}
-                ${isLight ? 'text-black' : 'text-white'}
+                ${isLight ? 'text-black' : 'text-mod-fg'}
                 ${isHidden || isInactive ? 'grayscale opacity-30 brightness-50' : ''}
               `}
               onClick={() => !isInactive && onToggleTimer(project.id)}
             >
               <div className="flex justify-between items-start">
                 <div className="flex flex-col gap-1">
-                  <span className={`text-[7px] lg:text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 ${isRunning ? (isLight ? 'bg-black text-white' : 'bg-white text-black') : 'bg-black/20'}`}>
+                  <span className={`text-[7px] lg:text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 ${isRunning ? (isLight ? 'bg-black text-mod-fg' : 'bg-mod-fg text-black') : 'bg-black/20'}`}>
                     {isRunning ? 'TX' : project.department.slice(0,3)}
                   </span>
                   {isInactive && (
-                    <span className={`text-[6px] lg:text-[8px] font-black uppercase tracking-widest px-1 py-0.5 bg-red-600 text-white`}>
+                    <span className={`text-[6px] lg:text-[8px] font-black uppercase tracking-widest px-1 py-0.5 bg-red-600 text-mod-fg`}>
                       INACTIVO
                     </span>
                   )}
@@ -138,21 +138,21 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({
                     <>
                       <button 
                         onClick={(e) => { e.stopPropagation(); onToggleHide(project.id); }}
-                        className={`w-5 h-5 lg:w-6 lg:h-6 xl:w-8 xl:h-8 flex items-center justify-center border transition-all hover:scale-110 ${isLight ? 'border-black/20 hover:bg-black hover:text-white' : 'border-white/20 hover:bg-white hover:text-mod-dark'}`}
+                        className={`w-5 h-5 lg:w-6 lg:h-6 xl:w-8 xl:h-8 flex items-center justify-center border transition-all hover:scale-110 ${isLight ? 'border-black/20 hover:bg-black hover:text-mod-fg' : 'border-mod-fg/20 hover:bg-mod-fg hover:text-mod-dark'}`}
                         title={isHidden ? "Mostrar" : "Ocultar"}
                       >
                         <span className="material-symbols-outlined text-xs lg:text-sm xl:text-lg">{isHidden ? 'visibility' : 'visibility_off'}</span>
                       </button>
                       <button 
                         onClick={(e) => { e.stopPropagation(); onStartWithTime(project.id); }}
-                        className={`w-5 h-5 lg:w-6 lg:h-6 xl:w-8 xl:h-8 flex items-center justify-center border transition-all hover:scale-110 ${isLight ? 'border-black/20 hover:bg-black hover:text-white' : 'border-white/20 hover:bg-white hover:text-mod-dark'}`}
+                        className={`w-5 h-5 lg:w-6 lg:h-6 xl:w-8 xl:h-8 flex items-center justify-center border transition-all hover:scale-110 ${isLight ? 'border-black/20 hover:bg-black hover:text-mod-fg' : 'border-mod-fg/20 hover:bg-mod-fg hover:text-mod-dark'}`}
                         title="Cargar/Iniciar con tiempo"
                       >
                         <span className="material-symbols-outlined text-xs lg:text-sm xl:text-lg">more_time</span>
                       </button>
                       <button 
                         onClick={(e) => { e.stopPropagation(); onToggleTimer(project.id); }}
-                        className={`w-5 h-5 lg:w-6 lg:h-6 xl:w-8 xl:h-8 flex items-center justify-center border transition-all hover:scale-110 ${isRunning ? (isLight ? 'bg-black text-white border-black' : 'bg-white text-mod-dark border-white') : (isLight ? 'border-black/20 hover:bg-black hover:text-white' : 'border-white/20 hover:bg-white hover:text-mod-dark')}`}
+                        className={`w-5 h-5 lg:w-6 lg:h-6 xl:w-8 xl:h-8 flex items-center justify-center border transition-all hover:scale-110 ${isRunning ? (isLight ? 'bg-black text-mod-fg border-black' : 'bg-mod-fg text-mod-dark border-mod-fg') : (isLight ? 'border-black/20 hover:bg-black hover:text-mod-fg' : 'border-mod-fg/20 hover:bg-mod-fg hover:text-mod-dark')}`}
                       >
                         <span className="material-symbols-outlined text-xs lg:text-sm xl:text-lg">{isRunning ? 'pause' : 'play_arrow'}</span>
                       </button>
@@ -179,7 +179,7 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({
                     onFocus={() => setCommentFocusedId(project.id)}
                     onBlur={() => setCommentFocusedId(null)}
                     placeholder="Comentario..."
-                    className={`w-full text-[7px] lg:text-[8px] xl:text-[9px] font-medium px-2 py-1 border bg-black/10 placeholder:opacity-50 outline-none ${isLight ? 'border-black/30 text-black placeholder:text-black/50' : 'border-white/20 text-white placeholder:text-white/50'}`}
+                    className={`w-full text-[7px] lg:text-[8px] xl:text-[9px] font-medium px-2 py-1 border bg-black/10 placeholder:opacity-50 outline-none ${isLight ? 'border-black/30 text-black placeholder:text-black/50' : 'border-mod-fg/20 text-mod-fg placeholder:text-mod-fg/50'}`}
                   />
                 </div>
               )}
@@ -194,13 +194,13 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({
                       <button
                         type="button"
                         onClick={() => onAdjustTimer(project.id, -60)}
-                        className={`w-6 h-6 lg:w-7 lg:h-7 flex items-center justify-center border text-xs font-black ${isLight ? 'border-black/30 hover:bg-black hover:text-white' : 'border-white/30 hover:bg-white hover:text-mod-dark'}`}
+                        className={`w-6 h-6 lg:w-7 lg:h-7 flex items-center justify-center border text-xs font-black ${isLight ? 'border-black/30 hover:bg-black hover:text-mod-fg' : 'border-mod-fg/30 hover:bg-mod-fg hover:text-mod-dark'}`}
                         title="−1 min"
                       >−</button>
                       <button
                         type="button"
                         onClick={() => onAdjustTimer(project.id, 60)}
-                        className={`w-6 h-6 lg:w-7 lg:h-7 flex items-center justify-center border text-xs font-black ${isLight ? 'border-black/30 hover:bg-black hover:text-white' : 'border-white/30 hover:bg-white hover:text-mod-dark'}`}
+                        className={`w-6 h-6 lg:w-7 lg:h-7 flex items-center justify-center border text-xs font-black ${isLight ? 'border-black/30 hover:bg-black hover:text-mod-fg' : 'border-mod-fg/30 hover:bg-mod-fg hover:text-mod-dark'}`}
                         title="+1 min"
                       >+</button>
                     </div>
@@ -214,7 +214,7 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({
                     <button
                       type="button"
                       onClick={e => { e.stopPropagation(); onResetProject(project.id); }}
-                      className={`pointer-events-auto shrink-0 px-2 py-1 text-[7px] lg:text-[8px] font-black uppercase border ${isLight ? 'border-black/30 hover:bg-black hover:text-white' : 'border-white/30 hover:bg-white hover:text-mod-dark'}`}
+                      className={`pointer-events-auto shrink-0 px-2 py-1 text-[7px] lg:text-[8px] font-black uppercase border ${isLight ? 'border-black/30 hover:bg-black hover:text-mod-fg' : 'border-mod-fg/30 hover:bg-mod-fg hover:text-mod-dark'}`}
                       title="Poner contador a cero"
                     >
                       Reset
@@ -229,7 +229,7 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({
         {filteredProjects.length < 12 && (
           <div 
             onClick={onNewProject}
-            className="border-2 border-dashed border-mod-border hover:border-white/50 flex flex-col items-center justify-center aspect-square text-slate-500 hover:text-white transition-all bg-mod-card/20"
+            className="border-2 border-dashed border-mod-border hover:border-mod-fg/50 flex flex-col items-center justify-center aspect-square text-slate-500 hover:text-mod-fg transition-all bg-mod-card/20"
           >
             <span className="material-symbols-outlined text-3xl">add</span>
             <span className="text-[8px] font-black uppercase mt-2">Nuevo</span>

@@ -58,11 +58,11 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, isOpen, onClose, onViewC
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-mod-blue flex items-center justify-center">
-                <span className="material-symbols-outlined text-white text-xl">grid_view</span>
+                <span className="material-symbols-outlined text-mod-fg text-xl">grid_view</span>
               </div>
-              <h1 className="text-white text-lg font-bold tracking-tighter italic">MOD <span className="font-light not-italic text-slate-400">TRACKER</span></h1>
+              <h1 className="text-mod-fg text-lg font-bold tracking-tighter italic">MOD <span className="font-light not-italic text-slate-400">TRACKER</span></h1>
             </div>
-            <button onClick={onClose} className="sidebar:hidden text-slate-500 hover:text-white">
+            <button onClick={onClose} className="sidebar:hidden text-slate-500 hover:text-mod-fg">
               <span className="material-symbols-outlined">close</span>
             </button>
           </div>
@@ -75,7 +75,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, isOpen, onClose, onViewC
                 className={`flex items-center gap-4 px-3 py-3 transition-all cursor-pointer border-l-2 ${
                   currentView === item.id
                     ? 'text-mod-blue border-mod-blue bg-mod-blue/5'
-                    : 'text-slate-400 border-transparent hover:text-white hover:bg-white/5'
+                    : 'text-slate-400 border-transparent hover:text-mod-fg hover:bg-mod-fg/5'
                 }`}
               >
                 <span className="material-symbols-outlined text-lg">{item.icon}</span>
@@ -93,15 +93,15 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, isOpen, onClose, onViewC
                 className="w-8 h-8 grayscale border border-mod-border bg-mod-card p-1" 
                 alt="avatar"
               />
-              <p className="text-[10px] font-bold uppercase text-white truncate max-w-[80px]">{user.username}</p>
+              <p className="text-[10px] font-bold uppercase text-mod-fg truncate max-w-[80px]">{user.username}</p>
             </div>
-            <button onClick={onLogout} className="text-slate-600 hover:text-red-500">
+            <button onClick={onLogout} className="text-slate-600 hover:text-red-500" aria-label="Cerrar sesión">
               <span className="material-symbols-outlined text-sm">logout</span>
             </button>
           </div>
           <button 
             onClick={onNewProject}
-            className="w-full flex items-center justify-center gap-2 h-10 bg-white text-mod-dark text-[9px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all shadow-lg active:scale-95"
+            className="w-full flex items-center justify-center gap-2 h-10 bg-mod-fg text-mod-dark text-[9px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all shadow-lg active:scale-95"
           >
             <span className="material-symbols-outlined text-sm">add</span>
             <span>Nuevo Proyecto</span>

@@ -138,10 +138,10 @@ const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({ onUserSelect })
       <div className="mb-8 lg:mb-10 border-b border-mod-border pb-6">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 bg-mod-blue flex items-center justify-center">
-            <span className="material-symbols-outlined text-white text-3xl">dashboard</span>
+            <span className="material-symbols-outlined text-mod-fg text-3xl">dashboard</span>
           </div>
           <div>
-            <h1 className="text-3xl lg:text-4xl font-black tracking-tighter text-white uppercase italic">PANEL <span className="text-slate-500 font-light not-italic">GLOBAL</span></h1>
+            <h1 className="text-3xl lg:text-4xl font-black tracking-tighter text-mod-fg uppercase italic">PANEL <span className="text-slate-500 font-light not-italic">GLOBAL</span></h1>
             <p className="text-[10px] text-mod-blue font-bold uppercase tracking-[0.3em] mt-1">Resumen del sistema y estadísticas por operador</p>
           </div>
         </div>
@@ -151,7 +151,7 @@ const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({ onUserSelect })
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="bg-mod-card border border-mod-border p-6">
           <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-2">Horas totales (sistema)</p>
-          <p className="text-2xl lg:text-3xl text-white font-black font-mono">{globalStats.totalHours} H</p>
+          <p className="text-2xl lg:text-3xl text-mod-fg font-black font-mono">{globalStats.totalHours} H</p>
         </div>
         <div className="bg-mod-card border border-mod-border p-6">
           <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-2">Operadores</p>
@@ -159,7 +159,7 @@ const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({ onUserSelect })
         </div>
         <div className="bg-mod-card border border-mod-border p-6">
           <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-2">Proyectos globales</p>
-          <p className="text-2xl lg:text-3xl text-white font-black font-mono">{globalStats.globalProjects}</p>
+          <p className="text-2xl lg:text-3xl text-mod-fg font-black font-mono">{globalStats.globalProjects}</p>
         </div>
         <div className="bg-mod-card border border-mod-border p-6">
           <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-2">Proyectos privados</p>
@@ -170,7 +170,7 @@ const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({ onUserSelect })
       {/* Gráficas: barras últimos 7 días + donut por proyecto */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
         <div className="bg-mod-card border border-mod-border p-6 lg:p-8">
-          <h3 className="text-white text-xs font-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+          <h3 className="text-mod-fg text-xs font-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
             <span className="material-symbols-outlined text-mod-blue text-sm">bar_chart</span>
             Actividad últimos 7 días
           </h3>
@@ -194,7 +194,7 @@ const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({ onUserSelect })
         </div>
 
         <div className="bg-mod-card border border-mod-border p-6 lg:p-8">
-          <h3 className="text-white text-xs font-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+          <h3 className="text-mod-fg text-xs font-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
             <span className="material-symbols-outlined text-mod-blue text-sm">donut_large</span>
             Tiempo por proyecto
           </h3>
@@ -209,7 +209,7 @@ const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({ onUserSelect })
                 <div key={i} className="flex justify-between items-center text-[9px] gap-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <div className={`w-2 h-2 flex-shrink-0 ${p.color}`} />
-                    <span className="text-white font-bold uppercase truncate">{p.name}</span>
+                    <span className="text-mod-fg font-bold uppercase truncate">{p.name}</span>
                   </div>
                   <span className="text-mod-blue font-mono flex-shrink-0">{p.percent.toFixed(1)}%</span>
                 </div>
@@ -222,7 +222,7 @@ const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({ onUserSelect })
       {/* Tabla estadísticas usuarios */}
       <div className="bg-mod-card border border-mod-border">
         <div className="p-6 bg-mod-dark border-b border-mod-border flex items-center justify-between">
-          <h3 className="text-white text-xs font-black uppercase tracking-[0.2em]">Estadísticas por operador</h3>
+          <h3 className="text-mod-fg text-xs font-black uppercase tracking-[0.2em]">Estadísticas por operador</h3>
           <span className="material-symbols-outlined text-slate-600 text-sm">group</span>
         </div>
         <div className="overflow-x-auto">
@@ -237,7 +237,7 @@ const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({ onUserSelect })
             </thead>
             <tbody className="divide-y divide-mod-border">
               {userStats.map(u => (
-                <tr key={u.id} className="hover:bg-white/[0.02] group">
+                <tr key={u.id} className="hover:bg-mod-fg/[0.02] group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <img
@@ -246,17 +246,17 @@ const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({ onUserSelect })
                         alt=""
                       />
                       <div>
-                        <p className="text-white font-black uppercase tracking-tighter">{u.username}</p>
+                        <p className="text-mod-fg font-black uppercase tracking-tighter">{u.username}</p>
                         <p className="text-[8px] text-slate-600 uppercase">{u.role} · {u.id}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right text-mod-blue font-mono font-bold">{formatTimeFull(u.totalSeconds)}</td>
-                  <td className="px-6 py-4 text-right text-white font-mono">{u.projectsWorked}</td>
+                  <td className="px-6 py-4 text-right text-mod-fg font-mono">{u.projectsWorked}</td>
                   <td className="px-6 py-4">
                     <button
                       onClick={() => onUserSelect(u)}
-                      className="w-9 h-9 flex items-center justify-center border border-mod-border text-slate-500 hover:text-white hover:border-mod-blue transition-all"
+                      className="w-9 h-9 flex items-center justify-center border border-mod-border text-slate-500 hover:text-mod-fg hover:border-mod-blue transition-all"
                       title="Inspeccionar"
                     >
                       <span className="material-symbols-outlined text-lg">visibility</span>

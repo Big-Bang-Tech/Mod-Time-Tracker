@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../services/db';
 import { User, Project, Role } from '../types';
+import ThemeToggle from './ThemeToggle';
 
 interface HeaderProps {
   title: string;
@@ -51,15 +52,15 @@ const Header: React.FC<HeaderProps> = ({ title, user, onMenuToggle, onSearch, ac
   return (
     <header className="flex items-center justify-between border-b border-mod-border bg-mod-dark px-4 lg:px-10 py-4 lg:py-6 z-[60] relative">
       <div className="flex items-center gap-4 lg:gap-6">
-        <button onClick={onMenuToggle} className="sidebar:hidden text-white">
+        <button onClick={onMenuToggle} className="sidebar:hidden text-mod-fg">
           <span className="material-symbols-outlined">menu</span>
         </button>
         
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 lg:w-10 lg:h-10 bg-white flex items-center justify-center">
+          <div className="w-8 h-8 lg:w-10 lg:h-10 bg-mod-fg flex items-center justify-center">
             <span className="material-symbols-outlined text-mod-dark text-xl lg:text-2xl font-bold">emergency</span>
           </div>
-          <h2 className="text-white text-sm lg:text-xl font-black tracking-tight uppercase truncate max-w-[120px] lg:max-w-none">{title}</h2>
+          <h2 className="text-mod-fg text-sm lg:text-xl font-black tracking-tight uppercase truncate max-w-[120px] lg:max-w-none">{title}</h2>
         </div>
         
         {isAdmin && (
@@ -83,9 +84,10 @@ const Header: React.FC<HeaderProps> = ({ title, user, onMenuToggle, onSearch, ac
         )}
         
         <div className="flex items-center gap-2">
-          <button 
+          <ThemeToggle />
+          <button
             onClick={onManualEntry}
-            className="flex items-center gap-2 h-9 lg:h-10 px-3 lg:px-5 border border-mod-blue text-mod-blue text-[10px] font-bold uppercase tracking-widest hover:bg-mod-blue hover:text-white transition-all shadow-lg active:scale-95"
+            className="flex items-center gap-2 h-9 lg:h-10 px-3 lg:px-5 border border-mod-blue text-mod-blue text-[10px] font-bold uppercase tracking-widest hover:bg-mod-blue hover:text-mod-fg transition-all shadow-lg active:scale-95"
             title="Inyección de Datos (Manual/Retroactiva)"
           >
             <span className="material-symbols-outlined text-sm">history_edu</span>
@@ -94,7 +96,7 @@ const Header: React.FC<HeaderProps> = ({ title, user, onMenuToggle, onSearch, ac
           
           <button 
             onClick={onActionButton}
-            className="flex items-center gap-2 h-9 lg:h-10 px-4 lg:px-6 bg-white text-mod-dark text-[10px] font-bold uppercase tracking-widest hover:bg-slate-200 transition-all shadow-lg active:scale-95"
+            className="flex items-center gap-2 h-9 lg:h-10 px-4 lg:px-6 bg-mod-fg text-mod-dark text-[10px] font-bold uppercase tracking-widest hover:bg-slate-200 transition-all shadow-lg active:scale-95"
           >
             <span className="material-symbols-outlined text-sm">sync</span>
             <span className="hidden sm:inline">{actionLabel}</span>

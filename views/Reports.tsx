@@ -72,20 +72,20 @@ const Reports: React.FC<ReportsProps> = ({ projects, historicalLogs, onManualCom
     <div className="p-10 max-w-[1400px] mx-auto">
       <div className="mb-10 flex items-end justify-between">
         <div>
-          <h2 className="text-4xl font-light tracking-tighter text-white">ANALÍTICA DEL <span className="font-bold">SISTEMA</span></h2>
+          <h2 className="text-4xl font-light tracking-tighter text-mod-fg">ANALÍTICA DEL <span className="font-bold">SISTEMA</span></h2>
           <div className="h-1 w-20 bg-mod-blue mt-2"></div>
         </div>
         <div className="flex gap-4">
           <button 
             onClick={handleExportCSV}
-            className="flex items-center gap-2 h-10 px-6 border border-mod-border bg-transparent text-slate-400 text-[10px] font-bold uppercase tracking-widest hover:bg-white hover:text-mod-dark transition-all"
+            className="flex items-center gap-2 h-10 px-6 border border-mod-border bg-transparent text-slate-400 text-[10px] font-bold uppercase tracking-widest hover:bg-mod-fg hover:text-mod-dark transition-all"
           >
             <span className="material-symbols-outlined text-sm">description</span>
             <span>Exportar Registro</span>
           </button>
           <button 
             onClick={onManualCommit}
-            className="flex items-center gap-2 h-10 px-6 bg-mod-blue text-white text-[10px] font-bold uppercase tracking-widest hover:brightness-110 transition-all shadow-xl"
+            className="flex items-center gap-2 h-10 px-6 bg-mod-blue text-mod-fg text-[10px] font-bold uppercase tracking-widest hover:brightness-110 transition-all shadow-xl"
           >
             <span className="material-symbols-outlined text-sm">sync</span>
             <span>Sincronizar Día</span>
@@ -104,7 +104,7 @@ const Reports: React.FC<ReportsProps> = ({ projects, historicalLogs, onManualCom
               <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">{stat.label}</p>
               <span className="material-symbols-outlined text-mod-blue text-lg">{stat.icon}</span>
             </div>
-            <p className="text-white tracking-tighter text-3xl font-black leading-tight truncate uppercase">{stat.value}</p>
+            <p className="text-mod-fg tracking-tighter text-3xl font-black leading-tight truncate uppercase">{stat.value}</p>
             <p className="text-mod-blue text-[10px] font-bold mt-2 uppercase tracking-widest">{stat.unit}</p>
           </div>
         ))}
@@ -112,7 +112,7 @@ const Reports: React.FC<ReportsProps> = ({ projects, historicalLogs, onManualCom
 
       <div className="flex flex-col lg:flex-row gap-4 mb-10">
         <div className="flex-1 bg-mod-card border border-mod-border p-8">
-          <h3 className="text-white text-xs font-black uppercase tracking-[0.3em] mb-10">Desglose de Utilización</h3>
+          <h3 className="text-mod-fg text-xs font-black uppercase tracking-[0.3em] mb-10">Desglose de Utilización</h3>
           <div className="space-y-6">
             {projects.filter(p => p.currentDaySeconds > 0).map((p, i) => {
               const percent = Math.round((p.currentDaySeconds / (totalTrackedToday || 1)) * 100);
@@ -120,7 +120,7 @@ const Reports: React.FC<ReportsProps> = ({ projects, historicalLogs, onManualCom
                 <div key={p.id} className="flex flex-col gap-2">
                   <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
                     <span className="text-slate-400">{p.name}</span>
-                    <span className="text-white font-mono">{percent}%</span>
+                    <span className="text-mod-fg font-mono">{percent}%</span>
                   </div>
                   <div className="w-full bg-mod-dark h-1 border border-mod-border overflow-hidden">
                     <div 
@@ -138,22 +138,22 @@ const Reports: React.FC<ReportsProps> = ({ projects, historicalLogs, onManualCom
         <div className="w-full lg:w-80 bg-mod-blue p-8 flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <span className="material-symbols-outlined text-white text-xl">psychology</span>
-              <p className="text-white text-[10px] font-black uppercase tracking-widest">Inteligencia Central</p>
+              <span className="material-symbols-outlined text-mod-fg text-xl">psychology</span>
+              <p className="text-mod-fg text-[10px] font-black uppercase tracking-widest">Inteligencia Central</p>
             </div>
-            <p className="text-white text-sm leading-relaxed font-light italic">
+            <p className="text-mod-fg text-sm leading-relaxed font-light italic">
               "{insight}"
             </p>
           </div>
-          <div className="pt-6 border-t border-white/20 mt-6">
-            <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Estado Sistema: Óptimo</p>
+          <div className="pt-6 border-t border-mod-fg/20 mt-6">
+            <p className="text-[10px] font-bold text-mod-fg/60 uppercase tracking-widest">Estado Sistema: Óptimo</p>
           </div>
         </div>
       </div>
 
       <div className="bg-mod-card border border-mod-border overflow-hidden">
         <div className="p-6 bg-mod-dark border-b border-mod-border">
-          <h3 className="text-white text-xs font-black uppercase tracking-[0.3em]">Historial Operativo</h3>
+          <h3 className="text-mod-fg text-xs font-black uppercase tracking-[0.3em]">Historial Operativo</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
@@ -167,10 +167,10 @@ const Reports: React.FC<ReportsProps> = ({ projects, historicalLogs, onManualCom
             </thead>
             <tbody className="divide-y divide-mod-border">
               {historicalLogs.slice().reverse().map((log) => (
-                <tr key={log.id} className="hover:bg-white/5 transition-colors group">
+                <tr key={log.id} className="hover:bg-mod-fg/5 transition-colors group">
                   <td className="px-8 py-5 text-slate-500 font-mono">{log.date.toUpperCase()}</td>
                   <td className="px-8 py-5">
-                    <span className="text-white font-bold uppercase tracking-tight">{log.projectName}</span>
+                    <span className="text-mod-fg font-bold uppercase tracking-tight">{log.projectName}</span>
                   </td>
                   <td className="px-8 py-5 font-mono text-mod-blue">
                     {formatSecondsFull(log.durationSeconds)}

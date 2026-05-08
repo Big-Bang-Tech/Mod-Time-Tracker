@@ -151,13 +151,13 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
           <div className="flex items-center gap-4">
             <span className="material-symbols-outlined text-red-500 text-4xl">admin_panel_settings</span>
             <div>
-              <h2 className="text-4xl font-black tracking-tighter text-white uppercase italic">CONTROL <span className="text-slate-500 font-light not-italic">OPERADORES</span></h2>
+              <h2 className="text-4xl font-black tracking-tighter text-mod-fg uppercase italic">CONTROL <span className="text-slate-500 font-light not-italic">OPERADORES</span></h2>
               <p className="text-[10px] text-red-500/70 font-bold uppercase tracking-[0.3em] mt-1">Directorio Activo de Personal Autorizado</p>
             </div>
           </div>
           <button 
             onClick={() => { setEditingUser(null); setUserFormData({username:'', password:'', role: Role.USER}); setShowUserModal(true); }}
-            className="bg-white text-mod-dark px-6 h-12 flex items-center gap-3 font-bold text-[10px] uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-lg active:scale-95"
+            className="bg-mod-fg text-mod-dark px-6 h-12 flex items-center gap-3 font-bold text-[10px] uppercase tracking-widest hover:bg-red-600 hover:text-mod-fg transition-all shadow-lg active:scale-95"
           >
             <span className="material-symbols-outlined text-lg">person_add</span>
             <span>Registrar Operador</span>
@@ -180,7 +180,7 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
               {users.map(user => {
                 const stats = getUserStats(user.id);
                 return (
-                  <tr key={user.id} className="hover:bg-white/[0.02] transition-colors group border-l border-transparent hover:border-red-600">
+                  <tr key={user.id} className="hover:bg-mod-fg/[0.02] transition-colors group border-l border-transparent hover:border-red-600">
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-3">
                         <div className={`w-2 h-2 rounded-full ${user.lastLogin !== '-' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-slate-800'}`}></div>
@@ -201,7 +201,7 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
                           </div>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-white font-black uppercase text-sm group-hover/item:text-red-500 transition-colors">{user.username}</span>
+                          <span className="text-mod-fg font-black uppercase text-sm group-hover/item:text-red-500 transition-colors">{user.username}</span>
                           <span className="text-[9px] text-slate-500 font-mono tracking-tighter">{user.id}</span>
                         </div>
                       </div>
@@ -218,7 +218,7 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
                     </td>
                     <td className="px-8 py-6">
                       <div className="flex flex-col gap-1">
-                        <span className="text-white font-mono text-sm">{stats.hours} <span className="text-[9px] text-slate-500 font-sans">TOTAL</span></span>
+                        <span className="text-mod-fg font-mono text-sm">{stats.hours} <span className="text-[9px] text-slate-500 font-sans">TOTAL</span></span>
                         <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">{stats.projectsCount} Proyectos asignados</span>
                       </div>
                     </td>
@@ -226,14 +226,14 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
                       <div className="flex justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity">
                          <button 
                            onClick={() => onUserSelect(user)} 
-                           className="w-10 h-10 flex items-center justify-center border border-mod-border hover:border-white hover:bg-white hover:text-mod-dark transition-all"
+                           className="w-10 h-10 flex items-center justify-center border border-mod-border hover:border-mod-fg hover:bg-mod-fg hover:text-mod-dark transition-all"
                            title="Ver detalles"
                          >
                            <span className="material-symbols-outlined text-lg">visibility</span>
                          </button>
                          <button 
                            onClick={() => { setEditingUser(user); setUserFormData({username: user.username, password: '', role: user.role}); setShowUserModal(true); }} 
-                           className="w-10 h-10 flex items-center justify-center border border-mod-border hover:border-mod-blue hover:bg-mod-blue hover:text-white transition-all"
+                           className="w-10 h-10 flex items-center justify-center border border-mod-border hover:border-mod-blue hover:bg-mod-blue hover:text-mod-fg transition-all"
                            title="Editar credenciales"
                          >
                            <span className="material-symbols-outlined text-lg">edit</span>
@@ -241,7 +241,7 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
                          {user.username !== 'Admin' && (
                            <button 
                             onClick={() => handleDeleteUser(user.id)} 
-                            className="w-10 h-10 flex items-center justify-center border border-mod-border hover:border-red-600 hover:bg-red-600 hover:text-white transition-all"
+                            className="w-10 h-10 flex items-center justify-center border border-mod-border hover:border-red-600 hover:bg-red-600 hover:text-mod-fg transition-all"
                             title="Eliminar registro"
                            >
                              <span className="material-symbols-outlined text-lg">delete_forever</span>
@@ -258,13 +258,13 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
 
         {showUserModal && (
           <div className="fixed inset-0 bg-mod-dark/95 backdrop-blur-xl z-[100] flex items-center justify-center p-4" onClick={() => setShowUserModal(false)}>
-            <div className="bg-mod-card border border-white/10 w-full max-w-md shadow-[0_0_50px_rgba(255,0,0,0.1)]" onClick={e => e.stopPropagation()}>
+            <div className="bg-mod-card border border-mod-fg/10 w-full max-w-md shadow-[0_0_50px_rgba(255,0,0,0.1)]" onClick={e => e.stopPropagation()}>
                <div className="p-8 border-b border-mod-border bg-mod-dark flex justify-between items-center">
                   <div className="flex items-center gap-3">
                     <span className="material-symbols-outlined text-red-500">emergency</span>
-                    <h3 className="text-white font-black uppercase tracking-widest text-sm">{editingUser ? 'MODIFICAR REGISTRO' : 'NUEVO OPERADOR'}</h3>
+                    <h3 className="text-mod-fg font-black uppercase tracking-widest text-sm">{editingUser ? 'MODIFICAR REGISTRO' : 'NUEVO OPERADOR'}</h3>
                   </div>
-                  <button onClick={() => setShowUserModal(false)} className="text-slate-500 hover:text-white transition-colors">
+                  <button onClick={() => setShowUserModal(false)} className="text-slate-500 hover:text-mod-fg transition-colors">
                     <span className="material-symbols-outlined">close</span>
                   </button>
                </div>
@@ -274,7 +274,7 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
                     <input 
                       value={userFormData.username} 
                       onChange={e=>setUserFormData({...userFormData, username: e.target.value.toUpperCase()})} 
-                      className="w-full bg-mod-dark border border-mod-border text-white px-4 py-4 text-sm font-mono focus:border-red-600 outline-none transition-all placeholder:text-slate-800" 
+                      className="w-full bg-mod-dark border border-mod-border text-mod-fg px-4 py-4 text-sm font-mono focus:border-red-600 outline-none transition-all placeholder:text-slate-800" 
                       placeholder="EJ: OPERADOR_X"
                     />
                   </div>
@@ -284,7 +284,7 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
                       type="password" 
                       value={userFormData.password} 
                       onChange={e=>setUserFormData({...userFormData, password: e.target.value})} 
-                      className="w-full bg-mod-dark border border-mod-border text-white px-4 py-4 text-sm font-mono focus:border-red-600 outline-none transition-all placeholder:text-slate-800"
+                      className="w-full bg-mod-dark border border-mod-border text-mod-fg px-4 py-4 text-sm font-mono focus:border-red-600 outline-none transition-all placeholder:text-slate-800"
                       placeholder="••••••••"
                     />
                   </div>
@@ -293,19 +293,19 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
                     <div className="grid grid-cols-2 gap-2">
                       <button 
                         onClick={() => setUserFormData({...userFormData, role: Role.USER})}
-                        className={`p-4 border text-[9px] font-bold uppercase tracking-widest transition-all ${userFormData.role === Role.USER ? 'bg-mod-blue text-white border-mod-blue' : 'bg-mod-dark text-slate-500 border-mod-border'}`}
+                        className={`p-4 border text-[9px] font-bold uppercase tracking-widest transition-all ${userFormData.role === Role.USER ? 'bg-mod-blue text-mod-fg border-mod-blue' : 'bg-mod-dark text-slate-500 border-mod-border'}`}
                       >
                         OPERATOR
                       </button>
                       <button 
                         onClick={() => setUserFormData({...userFormData, role: Role.ADMIN})}
-                        className={`p-4 border text-[9px] font-bold uppercase tracking-widest transition-all ${userFormData.role === Role.ADMIN ? 'bg-red-600 text-white border-red-600 shadow-[0_0_15px_rgba(220,38,38,0.3)]' : 'bg-mod-dark text-slate-500 border-mod-border'}`}
+                        className={`p-4 border text-[9px] font-bold uppercase tracking-widest transition-all ${userFormData.role === Role.ADMIN ? 'bg-red-600 text-mod-fg border-red-600 shadow-[0_0_15px_rgba(220,38,38,0.3)]' : 'bg-mod-dark text-slate-500 border-mod-border'}`}
                       >
                         SUPERUSER
                       </button>
                     </div>
                   </div>
-                  <button onClick={handleSaveUser} className="w-full bg-white text-mod-dark font-black py-5 text-[10px] uppercase tracking-[0.3em] hover:bg-red-600 hover:text-white transition-all shadow-xl">Sincronizar con Base de Datos</button>
+                  <button onClick={handleSaveUser} className="w-full bg-mod-fg text-mod-dark font-black py-5 text-[10px] uppercase tracking-[0.3em] hover:bg-red-600 hover:text-mod-fg transition-all shadow-xl">Sincronizar con Base de Datos</button>
                </div>
             </div>
           </div>
@@ -321,7 +321,7 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
           <div className="flex items-center gap-4">
             <span className="material-symbols-outlined text-mod-blue text-4xl">inventory_2</span>
             <div>
-              <h2 className="text-4xl font-black tracking-tighter text-white uppercase italic">SISTEMA <span className="text-slate-500 font-light not-italic">DE PROYECTOS</span></h2>
+              <h2 className="text-4xl font-black tracking-tighter text-mod-fg uppercase italic">SISTEMA <span className="text-slate-500 font-light not-italic">DE PROYECTOS</span></h2>
               <p className="text-[10px] text-mod-blue/70 font-bold uppercase tracking-[0.3em] mt-1">Listado de unidades · Clic para ver detalle</p>
             </div>
           </div>
@@ -338,15 +338,15 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
               <div
                 key={project.id}
                 onClick={() => onProjectSelect?.(project)}
-                className={`bg-mod-card border border-mod-border hover:border-mod-blue cursor-pointer hover:bg-white/[0.02] transition-all duration-300 group ${!project.isActive ? 'grayscale opacity-70' : ''}`}
+                className={`bg-mod-card border border-mod-border hover:border-mod-blue cursor-pointer hover:bg-mod-fg/[0.02] transition-all duration-300 group ${!project.isActive ? 'grayscale opacity-70' : ''}`}
               >
                 <div className="p-6 flex flex-col gap-4">
                   <div className="flex items-start gap-4">
-                    <div className={`w-12 h-12 flex-shrink-0 ${project.color} border border-white/20 flex items-center justify-center`}>
-                      <span className="material-symbols-outlined text-white/50 text-xl">layers</span>
+                    <div className={`w-12 h-12 flex-shrink-0 ${project.color} border border-mod-fg/20 flex items-center justify-center`}>
+                      <span className="material-symbols-outlined text-mod-fg/50 text-xl">layers</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className={`text-lg font-black text-white uppercase tracking-tighter truncate ${!project.isActive ? 'line-through opacity-50' : ''}`}>{project.name}</h3>
+                      <h3 className={`text-lg font-black text-mod-fg uppercase tracking-tighter truncate ${!project.isActive ? 'line-through opacity-50' : ''}`}>{project.name}</h3>
                       <p className="text-[9px] text-slate-500 uppercase tracking-widest mt-1">{project.category}</p>
                       {!project.isActive && <p className="text-[8px] text-red-500 font-black uppercase mt-1">INACTIVO</p>}
                     </div>
@@ -359,11 +359,11 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
                     </div>
                     <div className="text-right">
                       <p className="text-slate-500 text-[8px] font-black uppercase tracking-widest mb-0.5">Operadores</p>
-                      <p className="text-white font-mono font-bold text-sm">{userCount}</p>
+                      <p className="text-mod-fg font-mono font-bold text-sm">{userCount}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-slate-500 text-[8px] font-black uppercase tracking-widest mb-0.5">Propietario</p>
-                      <p className="text-white font-bold text-[10px] uppercase truncate max-w-[80px]">{projectOwner?.username ?? '—'}</p>
+                      <p className="text-mod-fg font-bold text-[10px] uppercase truncate max-w-[80px]">{projectOwner?.username ?? '—'}</p>
                     </div>
                   </div>
                 </div>
@@ -374,13 +374,13 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
 
         {showProjectModal && (
           <div className="fixed inset-0 bg-mod-dark/95 backdrop-blur-xl z-[100] flex items-center justify-center p-4" onClick={() => setShowProjectModal(false)}>
-            <div className="bg-mod-card border border-white/10 w-full max-w-md shadow-[0_0_50px_rgba(0,163,224,0.1)]" onClick={e => e.stopPropagation()}>
+            <div className="bg-mod-card border border-mod-fg/10 w-full max-w-md shadow-[0_0_50px_rgba(0,163,224,0.1)]" onClick={e => e.stopPropagation()}>
                <div className="p-8 border-b border-mod-border bg-mod-dark flex justify-between items-center">
                   <div className="flex items-center gap-3">
                     <span className="material-symbols-outlined text-mod-blue">edit_note</span>
-                    <h3 className="text-white font-black uppercase tracking-widest text-sm">Modificar Unidad de Trabajo</h3>
+                    <h3 className="text-mod-fg font-black uppercase tracking-widest text-sm">Modificar Unidad de Trabajo</h3>
                   </div>
-                  <button onClick={() => setShowProjectModal(false)} className="text-slate-500 hover:text-white transition-colors">
+                  <button onClick={() => setShowProjectModal(false)} className="text-slate-500 hover:text-mod-fg transition-colors">
                     <span className="material-symbols-outlined">close</span>
                   </button>
                </div>
@@ -390,7 +390,7 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
                     <input 
                       value={projectFormData.name} 
                       onChange={e=>setProjectFormData({...projectFormData, name: e.target.value.toUpperCase()})} 
-                      className="w-full bg-mod-dark border border-mod-border text-white px-4 py-4 text-sm font-mono focus:border-mod-blue outline-none transition-all" 
+                      className="w-full bg-mod-dark border border-mod-border text-mod-fg px-4 py-4 text-sm font-mono focus:border-mod-blue outline-none transition-all" 
                       placeholder="ID_PROYECTO"
                     />
                   </div>
@@ -399,7 +399,7 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
                     <input 
                       value={projectFormData.category} 
                       onChange={e=>setProjectFormData({...projectFormData, category: e.target.value})} 
-                      className="w-full bg-mod-dark border border-mod-border text-white px-4 py-4 text-sm focus:border-mod-blue outline-none transition-all"
+                      className="w-full bg-mod-dark border border-mod-border text-mod-fg px-4 py-4 text-sm focus:border-mod-blue outline-none transition-all"
                       placeholder="EJ: DESIGN SYSTEMS"
                     />
                   </div>
@@ -410,12 +410,12 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
                         <button 
                           key={c} 
                           onClick={()=>setProjectFormData({...projectFormData, color: c})} 
-                          className={`h-8 ${c} border ${projectFormData.color === c ? 'border-white scale-110' : 'border-transparent opacity-50'} transition-all`} 
+                          className={`h-8 ${c} border ${projectFormData.color === c ? 'border-mod-fg scale-110' : 'border-transparent opacity-50'} transition-all`} 
                         />
                       ))}
                     </div>
                   </div>
-                  <button onClick={handleSaveProject} className="w-full bg-white text-mod-dark font-black py-5 text-[10px] uppercase tracking-[0.3em] hover:bg-mod-blue hover:text-white transition-all shadow-xl">Actualizar Registro</button>
+                  <button onClick={handleSaveProject} className="w-full bg-mod-fg text-mod-dark font-black py-5 text-[10px] uppercase tracking-[0.3em] hover:bg-mod-blue hover:text-mod-fg transition-all shadow-xl">Actualizar Registro</button>
                </div>
             </div>
           </div>

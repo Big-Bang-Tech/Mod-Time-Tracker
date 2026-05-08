@@ -69,7 +69,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
           <div className="inline-block p-4 border-2 border-mod-blue mb-4">
             <span className="material-symbols-outlined text-mod-blue text-5xl">security</span>
           </div>
-          <h1 className="text-3xl font-black tracking-tighter text-white uppercase italic">MOD <span className="text-slate-500 font-light not-italic">TRACKER</span></h1>
+          <h1 className="text-3xl font-black tracking-tighter text-mod-fg uppercase italic">MOD <span className="text-slate-500 font-light not-italic">TRACKER</span></h1>
           <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em] mt-2">Acceso Centralizado MySQL</p>
         </div>
 
@@ -87,7 +87,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
                 value={username}
                 onChange={e => setUsername(e.target.value)}
                 placeholder="ID_OPERADOR"
-                className="w-full bg-mod-dark border border-mod-border text-white px-4 py-3 text-sm font-mono focus:border-mod-blue outline-none transition-all"
+                className="w-full bg-mod-dark border border-mod-border text-mod-fg px-4 py-3 text-sm font-mono focus:border-mod-blue outline-none transition-all"
                 required
               />
             </div>
@@ -98,7 +98,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-mod-dark border border-mod-border text-white px-4 py-3 text-sm font-mono focus:border-mod-blue outline-none transition-all"
+                className="w-full bg-mod-dark border border-mod-border text-mod-fg px-4 py-3 text-sm font-mono focus:border-mod-blue outline-none transition-all"
                 required
               />
             </div>
@@ -107,14 +107,14 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
               <div className="bg-red-900/20 border border-red-500 p-3 text-red-500 text-[9px] font-bold uppercase tracking-widest leading-relaxed">
                 {error}
                 {error.includes('404') && (
-                  <p className="mt-2 text-white/70 normal-case">Nota: Si estás en desarrollo local, api.php no funcionará hasta que lo subas a Plesk.</p>
+                  <p className="mt-2 text-mod-fg/70 normal-case">Nota: Si estás en desarrollo local, api.php no funcionará hasta que lo subas a Plesk.</p>
                 )}
               </div>
             )}
 
             <button 
               disabled={loading || (serverStatus === 'offline' && !canEnterOffline)}
-              className="w-full bg-white text-mod-dark py-4 font-bold text-[10px] uppercase tracking-[0.3em] hover:bg-mod-blue hover:text-white transition-all disabled:opacity-30"
+              className="w-full bg-mod-fg text-mod-dark py-4 font-bold text-[10px] uppercase tracking-[0.3em] hover:bg-mod-blue hover:text-mod-fg transition-all disabled:opacity-30"
             >
               {loading ? 'AUTENTICANDO...' : 'ENTRAR AL SISTEMA'}
             </button>

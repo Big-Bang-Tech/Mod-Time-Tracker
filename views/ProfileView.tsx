@@ -27,7 +27,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user }) => {
   return (
     <div className="p-10 max-w-md mx-auto">
       <div className="mb-10">
-        <h2 className="text-4xl font-light tracking-tighter text-white">SEGURIDAD <span className="font-bold">TERMINAL</span></h2>
+        <h2 className="text-4xl font-light tracking-tighter text-mod-fg">SEGURIDAD <span className="font-bold">TERMINAL</span></h2>
         <div className="h-1 w-20 bg-mod-blue mt-2"></div>
       </div>
 
@@ -35,7 +35,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user }) => {
         <div className="flex items-center gap-4 border-b border-mod-border pb-6">
            <img src={`https://picsum.photos/seed/${user.avatarSeed}/60`} className="w-16 h-16 grayscale border border-mod-border" />
            <div>
-              <p className="text-white font-black uppercase text-xl">{user.username}</p>
+              <p className="text-mod-fg font-black uppercase text-xl">{user.username}</p>
               <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{user.role}</p>
            </div>
         </div>
@@ -43,11 +43,11 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user }) => {
         <div className="space-y-4">
           <div>
             <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Nueva Clave</label>
-            <input type="password" value={pass} onChange={e=>setPass(e.target.value)} className="w-full bg-mod-dark border border-mod-border text-white px-4 py-3 text-sm font-mono focus:border-white outline-none" />
+            <input type="password" value={pass} onChange={e=>setPass(e.target.value)} className="w-full bg-mod-dark border border-mod-border text-mod-fg px-4 py-3 text-sm font-mono focus:border-mod-fg outline-none" />
           </div>
           <div>
             <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Confirmar Clave</label>
-            <input type="password" value={confirmPass} onChange={e=>setConfirmPass(e.target.value)} className="w-full bg-mod-dark border border-mod-border text-white px-4 py-3 text-sm font-mono focus:border-white outline-none" />
+            <input type="password" value={confirmPass} onChange={e=>setConfirmPass(e.target.value)} className="w-full bg-mod-dark border border-mod-border text-mod-fg px-4 py-3 text-sm font-mono focus:border-mod-fg outline-none" />
           </div>
         </div>
 
@@ -57,7 +57,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user }) => {
           </div>
         )}
 
-        <button onClick={handleChangePass} className="w-full bg-white text-mod-dark font-bold py-4 text-[10px] uppercase tracking-widest hover:bg-mod-blue hover:text-white transition-all">RESETEAR CREDENCIALES</button>
+        <button onClick={handleChangePass} className="w-full bg-mod-fg text-mod-dark font-bold py-4 text-[10px] uppercase tracking-widest hover:bg-mod-blue hover:text-mod-fg transition-all">RESETEAR CREDENCIALES</button>
       </div>
     </div>
   );

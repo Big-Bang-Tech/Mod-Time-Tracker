@@ -1,210 +1,404 @@
-# MOD Tracker - Sistema Operativo de Gestión de Tiempo
+# MOD Tracker — Sistema Operativo de Gestión de Tiempo
 
-Un dashboard de alto rendimiento para la gestión de proyectos y seguimiento de tiempo con estética Tech-Noir. Sistema multi-usuario con roles de administrador y usuario, diseñado para equipos que requieren un seguimiento preciso y profesional del tiempo invertido en proyectos.
+Plataforma multi-usuario de seguimiento de tiempo con estética Tech-Noir. Diseñada para equipos: cada operador tiene su propio panel de cronómetros con un único cronómetro activo a la vez, y los administradores ven la actividad agregada de todo el sistema.
 
-## 🚀 Instalación Rápida
+---
 
-### Requisitos Previos
-- Servidor web con PHP 7.4+ y MySQL 5.7+
-- Node.js 18+ y npm (para desarrollo)
-- Acceso a Google Gemini API (opcional, para análisis con IA)
+## Tabla de contenidos
 
-### Configuración
+- [Stack tecnológico](#stack-tecnológico)
+- [Instalación y arranque](#instalación-y-arranque)
+- [Roles y permisos](#roles-y-permisos)
+- [Guía del usuario (rol USER)](#guía-del-usuario-rol-user)
+- [Guía del administrador (rol ADMIN)](#guía-del-administrador-rol-admin)
+- [Tema claro / oscuro](#tema-claro--oscuro)
+- [Sincronización y guardado](#sincronización-y-guardado)
+- [Modelo de datos](#modelo-de-datos)
+- [API REST](#api-rest)
+- [Despliegue en Plesk](#despliegue-en-plesk)
+- [Notas de seguridad](#notas-de-seguridad)
 
-1. **Configurar la Base de Datos**:
-   - Crea una base de datos MySQL en tu panel Plesk o servidor.
-   - Edita `api.php` con los credenciales de conexión:
-     ```php
-     $host = 'localhost';
-     $db = 'mod_tracker_db';
-     $user = 'tu_usuario';
-     $pass = 'tu_contraseña';
-     ```
-   - O configura variables de entorno: `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS`
+---
 
-2. **Despliegue en Producción**:
-   - Sube todos los archivos (incluyendo `api.php`) a tu carpeta `httpdocs` o directorio raíz del servidor.
-   - El sistema creará automáticamente las tablas necesarias y el usuario **Admin** (clave: `123456789`) al primer acceso.
+## Stack tecnológico
 
-3. **Configurar la API Key de Google Gemini** (Opcional):
-   - Configura la variable de entorno `API_KEY` en tu servidor o vía `process.env.API_KEY`.
-   - Se utiliza para generar insights inteligentes de productividad en la vista de Reportes.
+| Capa | Tecnología |
+|---|---|
+| Frontend | React 19, TypeScript, Vite 6 |
+| Estilos | Tailwind CSS 3.4 (CDN, configurado inline en `index.html`) con tokens semánticos vía CSS variables |
+| Backend | PHP 7.4+ (un único `api.php` con PDO) |
+| Base de datos | MySQL 5.7+ / 8.0 (motor InnoDB) |
+| IA opcional | Google Gemini API (insights en Reportes) |
+| Iconografía | Material Symbols Outlined |
+| Tipografía | Inter + JetBrains Mono |
 
-### Desarrollo Local
+---
+
+## Instalación y arranque
+
+### Requisitos
+
+- Node.js 18+ y npm para desarrollo
+- PHP 7.4+ con extensión PDO MySQL
+- MySQL 5.7+ accesible con credenciales
+
+### Configuración de base de datos
+
+`api.php` lee credenciales desde variables de entorno con fallback a valores por defecto:
+
+```php
+$host = getenv('DB_HOST') ?: '...';
+$db   = getenv('DB_NAME') ?: 'mod_tracker_db';
+$user = getenv('DB_USER') ?: '...';
+$pass = getenv('DB_PASS') ?: '...';
+```
+
+En **producción (Plesk)**: define las variables en el panel del dominio → PHP Settings → Custom variables.
+
+En la **primera petición a `api.php`** se crean automáticamente todas las tablas y un usuario `Admin` (clave `123456789`). Las migraciones son idempotentes y aditivas (solo `CREATE TABLE IF NOT EXISTS` y `ALTER TABLE … ADD COLUMN` en try/catch), por lo que actualizar la app no destruye datos existentes.
+
+### Desarrollo local
 
 ```bash
 # Instalar dependencias
 npm install
 
-# Ejecutar servidor de desarrollo (frontend)
+# Frontend (Vite, http://localhost:5173)
 npm run dev
 
-# Ejecutar servidor PHP local (backend)
+# Backend PHP (http://localhost:8080)
 npm run dev:api
 
-# Ejecutar ambos simultáneamente
+# Ambos a la vez
 npm run dev:full
 
-# Compilar para producción
+# Build de producción → dist/
 npm run build
 ```
 
-## ✨ Funcionalidades Principales
-
-### 🎯 Seguimiento de Tiempo en Tiempo Real
-
-- **Cronómetros Múltiples**: Gestiona múltiples proyectos simultáneamente con cronómetros independientes
-- **Un Solo Cronómetro Activo**: Solo un proyecto puede estar en ejecución a la vez (automáticamente pausa otros al iniciar uno nuevo)
-- **Inicio con Tiempo Preestablecido**: Inicia un cronómetro con tiempo acumulado desde el inicio
-- **Ajuste Manual**: Ajusta el tiempo con botones +/- para correcciones rápidas
-- **Reset de Contador**: Reinicia el contador diario de cualquier proyecto
-- **Comentarios de Sesión**: Añade comentarios a cada sesión de trabajo que se guardan con el registro diario
-- **Guardado Automático Diario**: Los tiempos se guardan automáticamente al cambiar de día
-- **Wake Lock**: Mantiene la pantalla activa cuando hay cronómetros en ejecución (compatible con navegadores modernos)
-- **Sincronización Automática**: Los datos se sincronizan con el servidor cada 15 segundos
-
-### 📊 Gestión de Proyectos
-
-- **Crear y Editar Proyectos**: Crea proyectos con nombre, categoría y color personalizado
-- **Proyectos Globales y Privados**: 
-  - Los administradores pueden crear proyectos globales visibles para todos
-  - Los usuarios pueden crear proyectos privados solo para ellos
-- **Ocultar Proyectos**: Oculta proyectos que no necesitas ver sin eliminarlos
-- **Reordenar por Drag & Drop**: Organiza tus proyectos arrastrándolos a la posición deseada
-- **Categorización**: Organiza proyectos por categorías personalizadas
-- **15 Colores Vibrantes**: Paleta de colores Tech-Noir para identificar proyectos visualmente
-- **Activar/Desactivar Proyectos**: Los administradores pueden desactivar proyectos sin eliminarlos
-
-### 👥 Sistema de Usuarios y Roles
-
-- **Roles de Usuario**: 
-  - **ADMIN**: Acceso completo al panel de administración y gestión global
-  - **USER**: Acceso a sus propios proyectos y estadísticas
-- **Gestión de Usuarios**: Los administradores pueden ver, crear y gestionar usuarios
-- **Vista Detallada de Usuarios**: Análisis completo de actividad por usuario
-- **Vista Detallada de Proyectos**: Estadísticas y usuarios que trabajan en cada proyecto
-- **Perfiles de Usuario**: Visualización y edición del perfil personal
-
-### 📝 Registros y Movimientos
-
-- **Historial Completo**: Visualiza todos tus registros de tiempo históricos
-- **Inyección Manual de Tiempo**: Añade tiempo manualmente a proyectos con fecha personalizable
-- **Edición de Movimientos**: Edita duración, fecha y comentarios de registros existentes
-- **Eliminación de Movimientos**: Elimina registros incorrectos con confirmación
-- **Historial de Modificaciones**: Los administradores pueden ver el historial completo de cambios en los logs
-- **Estados de Registro**: 
-  - `NORMAL`: Tiempo registrado automáticamente por cronómetro
-  - `MANUAL`: Tiempo añadido manualmente
-  - `PRESET`: Tiempo iniciado con valor preestablecido
-
-### 📈 Reportes y Analítica
-
-- **Análisis con Inteligencia Artificial**: Insights de productividad generados por Google Gemini API
-- **Estadísticas de Productividad**: Métricas detalladas de tiempo trabajado
-- **Historial Semanal**: Vista de actividad de los últimos 7 días
-- **Vista de Movimientos**: Lista completa y filtrable de todos los registros
-- **Exportación a CSV**: Exporta todos tus registros en formato CSV para análisis externo
-- **Sincronización Manual**: Fuerza el guardado de tiempos acumulados antes del cambio de día
-
-### 🎨 Panel de Administración
-
-- **Dashboard Global**: Vista general de todos los usuarios, proyectos y estadísticas
-- **Estadísticas Agregadas**: 
-  - Total de horas registradas en el sistema
-  - Número de usuarios activos
-  - Distribución de proyectos globales vs privados
-  - Actividad de los últimos 7 días
-  - Distribución de tiempo por proyecto (gráfico de dona)
-- **Gestión de Usuarios**: Lista completa con estadísticas de cada usuario
-- **Gestión de Proyectos**: Vista global de todos los proyectos del sistema
-- **Búsqueda Global**: Busca usuarios y proyectos rápidamente desde el header
-
-### 🔧 Características Técnicas
-
-- **Modo Offline**: Funciona con datos mock cuando no hay conexión a la base de datos (útil para desarrollo)
-- **Persistencia Local**: Guarda la sesión del usuario en localStorage
-- **Responsive Design**: Interfaz optimizada para desktop y móvil
-- **Actualización en Tiempo Real**: Los cronómetros se actualizan cada segundo
-- **Validación de Datos**: Validación completa en frontend y backend
-- **Manejo de Errores**: Mensajes de error claros y manejo robusto de fallos de conexión
-
-## 🛠️ Tecnologías
-
-- **React 19** & **TypeScript**: Framework moderno con tipado estático
-- **Vite 6**: Build tool de alta velocidad para desarrollo y producción
-- **MySQL / PHP API**: Persistencia de datos centralizada y segura con PDO
-- **Tailwind CSS 3.4**: Estilo visual avanzado de alta densidad con tema Tech-Noir personalizado
-- **Google Gemini API**: Inteligencia artificial para análisis de productividad y generación de insights
-- **Material Symbols**: Iconografía moderna y consistente
-
-## 📁 Estructura del Proyecto
-
-```
-Mod-Time-Tracker/
-├── api.php                 # Backend PHP/MySQL API
-├── App.tsx                 # Componente principal de la aplicación
-├── index.tsx              # Punto de entrada
-├── types.ts               # Definiciones de tipos TypeScript
-├── constants.tsx          # Constantes y datos mock
-├── components/            # Componentes reutilizables
-│   ├── Header.tsx        # Barra superior con búsqueda y acciones
-│   └── Sidebar.tsx       # Menú lateral de navegación
-├── views/                 # Vistas principales
-│   ├── DashboardGrid.tsx         # Vista principal de cronómetros
-│   ├── MovementsView.tsx         # Vista de movimientos/registros
-│   ├── Reports.tsx              # Vista de reportes y analítica
-│   ├── WeeklyHistoryView.tsx    # Historial semanal
-│   ├── ProfileView.tsx          # Perfil de usuario
-│   ├── AdminDashboardView.tsx  # Panel de administración
-│   ├── AdminView.tsx           # Lista de usuarios/proyectos
-│   ├── AdminUserDetailView.tsx # Detalle de usuario
-│   └── AdminProjectDetailView.tsx # Detalle de proyecto
-├── services/              # Servicios de backend
-│   ├── db.ts            # Servicio de base de datos
-│   └── geminiService.ts # Servicio de IA (Gemini)
-└── mockData/            # Datos de prueba para desarrollo
-```
-
-## 🗄️ Estructura de Base de Datos
-
-El sistema crea automáticamente las siguientes tablas:
-
-- **users**: Información de usuarios (id, username, password, role, avatar_seed, last_login, project_order)
-- **projects**: Metadatos de proyectos (id, creator_id, name, category, color, is_global, is_active)
-- **user_projects**: Estado individual de proyectos por usuario (user_id, project_id, running_since, current_day_seconds, session_comment, hidden_by_user)
-- **logs**: Registros históricos de tiempo (id, user_id, project_id, project_name, date_str, duration_seconds, status, comment, created_at)
-- **log_modification_history**: Historial de modificaciones de logs para auditoría
-
-## 🔐 Seguridad
-
-- Las contraseñas se almacenan en texto plano (considera implementar hash para producción)
-- La API valida todos los inputs antes de procesarlos
-- CORS configurado para permitir solicitudes desde el frontend
-- Validación de roles en el frontend y backend
-
-## 📝 Notas de Desarrollo
-
-- El sistema funciona en modo mock cuando no hay conexión a la base de datos (útil para desarrollo)
-- Los usuarios mock disponibles son: `Admin` y `Grobas` (ambos con clave `123456789`)
-- La sincronización automática ocurre cada 15 segundos
-- Los cronómetros se actualizan cada segundo en el frontend
-- El guardado automático diario ocurre al detectar cambio de fecha
-
-## 🚧 Próximas Mejoras Sugeridas
-
-- [ ] Hash de contraseñas (bcrypt)
-- [ ] Autenticación con tokens JWT
-- [ ] Notificaciones push para recordatorios
-- [ ] Integración con calendarios (Google Calendar, Outlook)
-- [ ] Exportación a más formatos (PDF, Excel)
-- [ ] Gráficos avanzados de productividad
-- [ ] Modo oscuro/claro configurable
-- [ ] Multi-idioma (i18n)
-
-## 📄 Licencia
-
-Este proyecto es privado y de uso interno.
+Vite proxea `/api.php` a `http://localhost:8080`, por lo que el frontend en dev usa el PHP local de forma transparente.
 
 ---
 
-**MOD Tracker** - Sistema Operativo de Gestión de Tiempo v1.0.0
+## Roles y permisos
+
+| Acción | USER | ADMIN |
+|---|:---:|:---:|
+| Iniciar sesión | ✅ | ✅ |
+| Ver / iniciar / parar cronómetros propios | ✅ | — |
+| Crear proyectos privados | ✅ | ✅ |
+| Crear proyectos globales | — | ✅ |
+| Editar / eliminar sus propios logs | ✅ | ✅ |
+| Editar / eliminar logs de otros usuarios | — | ✅ |
+| Ver historial de modificaciones de logs | — | ✅ |
+| Ver Panel Global, Operadores, Estadísticas | — | ✅ |
+| Buscar usuarios y proyectos globales | — | ✅ |
+| Activar / desactivar proyectos globales | — | ✅ |
+
+---
+
+## Guía del usuario (rol USER)
+
+### 1. Inicio de sesión
+
+- Pantalla `LoginView` con dos inputs: usuario y contraseña.
+- La sesión queda guardada en `localStorage` bajo `mod_tracker_session` para no tener que volver a entrar mientras no se cierre sesión expresamente.
+
+### 2. Terminal (Dashboard)
+
+Vista principal: una **rejilla de tarjetas**, una por proyecto visible. Cada tarjeta es un cronómetro independiente.
+
+**Estado de las tarjetas:**
+- **Inactiva** → solo muestra acumulado del día.
+- **Activa** → un proyecto está corriendo. Borde resaltado y sombreado luminoso (`active-project-card`).
+
+**Acciones por tarjeta:**
+
+| Acción | Cómo |
+|---|---|
+| **Iniciar / parar cronómetro** | Clic en el botón principal. Solo un cronómetro puede estar activo a la vez en el sistema → al iniciar uno nuevo se detiene automáticamente el anterior. |
+| **Ajuste manual ±** | Botones `+` / `−` para sumar o restar tiempo con incrementos rápidos (útil para pausas reales o correcciones de minutos). |
+| **Iniciar con tiempo preestablecido** | Permite arrancar el cronómetro con un valor inicial ya cargado (registro `PRESET`). |
+| **Comentario de sesión** | Campo de texto que viaja junto al log diario al guardar. Se almacena en `user_projects.session_comment` mientras el cronómetro corre y se persiste en `logs.comment` al cerrar el día. |
+| **Reset diario** | Reinicia a 0 el contador diario de ese proyecto sin afectar al histórico. |
+| **Ocultar proyecto** | Marca el proyecto como oculto solo para tu vista (`user_projects.hidden_by_user`). El proyecto sigue existiendo y otros usuarios lo ven. |
+| **Reordenar** | Drag & drop. El orden se persiste en `users.project_order`. |
+
+**Cronómetro y Wake Lock:** mientras un cronómetro corre, la pantalla del navegador no se apaga (Wake Lock API). Útil para terminales fijos en taller.
+
+### 3. Crear un proyecto
+
+Botón **Nuevo Proyecto** en la sidebar inferior. Abre un modal con:
+
+- **Nombre** (obligatorio)
+- **Categoría** (texto libre, sirve de agrupador)
+- **Color** — paleta de 15 colores vibrantes (red, blue, green, orange, purple, pink, cyan, yellow, indigo, emerald, crimson, teal, amber, violet, lime)
+- **Visibilidad**:
+  - Como USER → se crea como **proyecto privado** (`is_global = 0`), solo tú lo ves
+  - Como ADMIN → puedes elegir entre privado o global
+
+Los proyectos privados solo aparecen en el dashboard de su creador.
+
+### 4. Inyectar tiempo manualmente
+
+Botón **Inyectar** en el Header (icono `history_edu`).
+
+Se usa para registrar tiempo de forma retroactiva o cuando se olvidó arrancar el cronómetro:
+
+- Selección del proyecto
+- Fecha (cualquier fecha pasada)
+- Duración (horas / minutos)
+- Comentario opcional
+
+El registro se crea con `status = MANUAL` para diferenciarlo de los registros automáticos.
+
+### 5. Movimientos
+
+`Movimientos` (sidebar) → lista cronológica de tus logs históricos con filtros y acciones:
+
+- **Editar** un log → abre modal con duración, fecha y comentario. Cada edición se guarda en `log_modification_history` (visible solo para admins).
+- **Eliminar** un log con confirmación.
+- **Estados**: `NORMAL` (cronómetro), `MANUAL` (inyección manual), `PRESET` (iniciado con tiempo prefijado).
+
+### 6. Mis Reportes
+
+Vista `Reports` con:
+
+- **Métricas agregadas** del usuario (total horas, días activos, etc.)
+- **Desglose de utilización** por proyecto en porcentaje (gráfico de barras)
+- **Inteligencia Central** — si está configurada la API Key de Gemini, se generan insights de productividad en lenguaje natural a partir de tus logs.
+- **Historial Operativo** — tabla de últimos registros.
+- **Exportación CSV** del histórico completo.
+- **Sincronización Manual** — fuerza el cierre del día actual y persiste todos los segundos acumulados.
+
+### 7. Historial
+
+`Historial` (sidebar) → vista semanal de los últimos 7 días con totales por día y proyecto.
+
+### 8. Perfil
+
+Visualiza y edita tus datos: avatar (semilla DiceBear), nombre de usuario, contraseña.
+
+---
+
+## Guía del administrador (rol ADMIN)
+
+Los administradores tienen los mismos cronómetros que un usuario normal, pero la sidebar les muestra apartados adicionales. La vista `Terminal` (cronómetros) queda **oculta** por defecto en el menú admin (se prioriza la gestión global) — está disponible si se navega manualmente.
+
+### Búsqueda global
+
+En el Header aparece un input de búsqueda que indexa **usuarios** y **proyectos** simultáneamente. Permite saltar rápidamente al detalle de cualquier entidad.
+
+### Panel Global (`AdminDashboardView`)
+
+Resumen ejecutivo de todo el sistema:
+
+- Total de horas registradas, número de operadores activos
+- Distribución de proyectos globales vs privados
+- Listado clicable de operadores con horas trabajadas
+
+### Operadores (`AdminView` filtrado a usuarios)
+
+Lista completa de usuarios. Clic en cualquiera → `AdminUserDetailView`:
+
+- Estadísticas individuales (horas totales, proyectos activos, último login)
+- Listado de proyectos en los que el operador ha trabajado, con su porcentaje
+- Acceso al historial completo de logs del operador, con capacidad de **editar o eliminar logs ajenos**
+- Cualquier modificación queda registrada en `log_modification_history` con marca temporal y `modified_by_user_id`
+
+### Proyectos Global (`AdminView` filtrado a proyectos)
+
+Lista de todos los proyectos del sistema, globales y privados de cualquier usuario. Clic → `AdminProjectDetailView`:
+
+- Métricas del proyecto: horas acumuladas, número de operadores que lo usan, días activos
+- Listado de operadores con horas individuales en ese proyecto
+- **Activar / desactivar** el proyecto (`is_active`) — desactivados quedan ocultos para todos pero conservan histórico
+
+### Estadísticas (`AdminStatsView`)
+
+- Distribución temporal global (últimos 7 días)
+- Gráfico de dona con tiempo por proyecto
+- Top de operadores y proyectos
+- Filtros por rango de fechas
+
+### Historial de modificaciones de logs
+
+Cada vez que alguien (admin o usuario) edita un log, se guarda en `log_modification_history`:
+
+- `old_duration_seconds` / `new_duration_seconds`
+- `old_date_str` / `new_date_str`
+- `old_comment` / `new_comment`
+- `modified_by_user_id` y `modified_at`
+
+Visible desde el detalle de log en cualquier vista de movimientos para usuarios admin.
+
+### Crear usuario nuevo
+
+Desde **Operadores** → botón crear. Campos: usuario, contraseña, rol (USER / ADMIN), avatar.
+
+---
+
+## Tema claro / oscuro
+
+Botón cuadrado con icono en la parte superior derecha del Header (junto a Inyectar / Sincronizar):
+
+- **Claro** (`light_mode` ☀️) — paleta blanco / gris azulado
+- **Oscuro** (`dark_mode` 🌙) — paleta Tech-Noir original
+- **Sistema** (`desktop_windows` 🖥️) — sigue el `prefers-color-scheme` del SO y se actualiza en tiempo real si lo cambias
+
+La preferencia se persiste en `localStorage` con la clave `mod_tracker_theme`. Un script inline en `<head>` aplica el tema antes de que cargue React para evitar el "flash" de tema incorrecto.
+
+Internamente todos los tokens (`mod-dark`, `mod-card`, `mod-border`, `mod-fg`, `background-dark`) son CSS variables en formato RGB triple, lo que permite usar opacidad de Tailwind (`bg-mod-fg/20`, `border-mod-fg/[0.02]`, etc.) en cualquier modo. El acento `mod-blue` (`#00a3e0`) es invariante.
+
+---
+
+## Sincronización y guardado
+
+| Evento | Frecuencia |
+|---|---|
+| Refresco visual del cronómetro | 1 s |
+| Sincronización con servidor | 15 s |
+| Cierre automático del día | Al detectar cambio de fecha (medianoche) |
+| Cierre manual del día | Botón "Sincronizar" en Reportes / Header |
+
+Al cerrar un día:
+1. Para todos los cronómetros corriendo del usuario.
+2. Crea un registro en `logs` por cada proyecto con `current_day_seconds > 0`.
+3. Resetea `user_projects.current_day_seconds` y `running_since` a 0/NULL.
+4. La operación es idempotente: aunque haya múltiples disparos simultáneos (timer + cambio de fecha + manual), no se duplican logs.
+
+Si el dispositivo está offline, los segundos siguen contando localmente; en cuanto vuelve la conexión, la siguiente sincronización los persiste.
+
+---
+
+## Modelo de datos
+
+Esquema InnoDB. Todas las tablas se autocrean y autoextienden en la primera petición a `api.php`.
+
+### `users`
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `id` | VARCHAR(50) PK | UUID generado en cliente |
+| `username` | VARCHAR(100) UNIQUE | Login |
+| `password` | VARCHAR(255) | Texto plano (ver [Seguridad](#notas-de-seguridad)) |
+| `role` | VARCHAR(20) | `USER` o `ADMIN` |
+| `avatar_seed` | VARCHAR(100) | Semilla DiceBear |
+| `last_login` | DATETIME | |
+| `project_order` | TEXT | JSON array con orden de proyectos |
+
+### `projects`
+| Columna | Tipo |
+|---|---|
+| `id`, `creator_id`, `name`, `category`, `color` | strings |
+| `is_global` | TINYINT(1) — 1 = visible para todos |
+| `is_active` | TINYINT(1) — 0 = desactivado, oculto |
+
+### `user_projects` (estado por usuario)
+| Columna | Tipo |
+|---|---|
+| `user_id` + `project_id` | PK compuesta |
+| `running_since` | VARCHAR(50) NULL — timestamp ISO si está corriendo |
+| `current_day_seconds` | INT — acumulado del día sin persistir aún |
+| `session_comment` | VARCHAR(500) NULL |
+| `hidden_by_user` | TINYINT(1) |
+
+### `logs` (registros históricos)
+| Columna | Tipo |
+|---|---|
+| `id` (UUID), `user_id`, `project_id`, `project_name` | strings |
+| `date_str` | VARCHAR(50) — ISO `YYYY-MM-DD` |
+| `duration_seconds` | INT |
+| `status` | `NORMAL` / `MANUAL` / `PRESET` |
+| `comment` | TEXT NULL |
+| `created_at` | TIMESTAMP |
+
+### `log_modification_history` (auditoría)
+Cada edición de log guarda valores antiguos y nuevos, autor de la edición y timestamp.
+
+---
+
+## API REST
+
+Todos los endpoints son `GET` o `POST` a `api.php?action=<nombre>`.
+
+| Acción | Descripción |
+|---|---|
+| `status` | Health check, retorna `{status, db, server_time}` |
+| `get_users` | Lista de usuarios |
+| `save_user` | Crea o actualiza un usuario (upsert por id) |
+| `get_projects?userId=X` | Lista de proyectos visibles para un usuario |
+| `save_project` | Crea o actualiza un proyecto |
+| `delete_project` | Elimina un proyecto |
+| `get_logs?userId=X` | Logs históricos de un usuario (admin: todos) |
+| `save_log` | Crea un log nuevo |
+| `update_log` | Edita un log existente, registra historial |
+| `delete_log` | Elimina un log |
+| `get_log_modification_history?logId=X` | Historial de ediciones de un log |
+
+CORS abierto a `*` (apropiado solo si el dominio se sirve detrás del mismo origen en producción).
+
+---
+
+## Despliegue en Plesk
+
+1. **Backup BD**: `mysqldump --single-transaction --routines --triggers …`
+2. **Backup archivos**: `tar czf backup.tgz httpdocs/`
+3. **Build local**: `npm ci && npm run build`
+4. **Subir vía SFTP/rsync** a `httpdocs/`:
+   - Contenido de `dist/` (`index.html` + `assets/`)
+   - `api.php`
+5. **Verificar**: `curl https://tu-dominio/api.php?action=status` debe responder `{"status":"online","db":"ok"}`.
+
+Las migraciones (`ALTER TABLE ADD COLUMN`) se aplican automáticamente en la primera petición. No hay paso de migración manual.
+
+---
+
+## Notas de seguridad
+
+- ⚠️ **Contraseñas en texto plano**: el sistema actual guarda las contraseñas sin hashear. Recomendado migrar a `password_hash` / `password_verify` (bcrypt) en producción.
+- ⚠️ **CORS abierto** (`Access-Control-Allow-Origin: *`): adecuado para desarrollo, restringir en producción al dominio real.
+- ⚠️ **API Key de Gemini**: no comprometas la clave en el bundle. En producción, configúrala como variable de entorno `API_KEY` y proxéala desde el backend si se quiere ocultar al cliente.
+- ✅ Validación de roles tanto en frontend como en backend.
+- ✅ Uso exclusivo de PDO con prepared statements (sin concatenación SQL).
+
+---
+
+## Estructura del proyecto
+
+```
+Mod-Time-Tracker/
+├── api.php                       Backend PHP/MySQL (único archivo)
+├── App.tsx                       Componente raíz, sesión y routing
+├── index.html                    HTML + Tailwind config + tema CSS variables
+├── index.tsx                     Punto de entrada React
+├── types.ts                      Tipos TypeScript compartidos
+├── constants.tsx                 Datos mock para modo offline
+├── components/
+│   ├── Header.tsx               Top bar (búsqueda, acciones, ThemeToggle)
+│   ├── Sidebar.tsx              Menú lateral
+│   └── ThemeToggle.tsx          Botón cíclico claro/oscuro/sistema
+├── hooks/
+│   └── useTheme.ts              Hook de tema con persistencia y matchMedia
+├── views/
+│   ├── DashboardGrid.tsx        Rejilla de cronómetros
+│   ├── MovementsView.tsx        Lista editable de logs
+│   ├── Reports.tsx              Reportes individuales + Gemini
+│   ├── WeeklyHistoryView.tsx    Vista de 7 días
+│   ├── ProfileView.tsx          Perfil del usuario
+│   ├── ProjectList.tsx          Selector de proyectos
+│   ├── LoginView.tsx            Pantalla de login
+│   ├── AdminDashboardView.tsx   Panel global admin
+│   ├── AdminView.tsx            Lista de usuarios o proyectos
+│   ├── AdminUserDetailView.tsx  Detalle por usuario
+│   ├── AdminProjectDetailView.tsx Detalle por proyecto
+│   └── AdminStatsView.tsx       Estadísticas agregadas
+├── services/
+│   ├── db.ts                    Cliente del API (con fallback mock)
+│   └── geminiService.ts         Cliente Gemini para insights
+├── firefox-extension/           Extensión Firefox complementaria
+└── mockData/                    Datos de prueba para dev offline
+```
+
+---
+
+**MOD Tracker** v1.0.0 — Uso interno.

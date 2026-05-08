@@ -86,10 +86,36 @@ const App: React.FC = () => {
   useEffect(() => {
     if (currentUser?.id) {
       loadUserData(currentUser.id);
-      const poll = setInterval(() => loadUserData(currentUser.id), 15000);
+      refreshCurrentUserFromServer(currentUser.id);
+      const poll = setInterval(() => {
+        loadUserData(currentUser.id);
+        refreshCurrentUserFromServer(currentUser.id);
+      }, 15000);
       return () => clearInterval(poll);
     }
   }, [currentUser?.id]);
+
+  const refreshCurrentUserFromServer = async (userId: string) => {
+    try {
+      const all = await db.getUsers();
+      const fresh = all.find((u: User) => u.id === userId);
+      if (!fresh) return;
+      setCurrentUser(prev => {
+        if (!prev) return prev;
+        // Conservar la password local (el servidor la devuelve igual, pero por si acaso)
+        const merged = { ...prev, ...fresh, password: prev.password };
+        // Solo persistir/actualizar si algún campo realmente cambió
+        const changed = JSON.stringify(prev) !== JSON.stringify(merged);
+        if (changed) {
+          localStorage.setItem('mod_tracker_session', JSON.stringify(merged));
+          return merged;
+        }
+        return prev;
+      });
+    } catch (_) {
+      // Silencioso: si falla el refresh seguimos con el currentUser actual
+    }
+  };
 
   const loadUserData = async (userId: string) => {
     try {
@@ -336,9 +362,14 @@ const App: React.FC = () => {
   };
 
   const handleDeleteLog = async (logId: string) => {
+    if (!currentUser) return;
     if (confirm('¿ELIMINAR ESTE MOVIMIENTO EN EL SERVIDOR?')) {
-      await db.deleteLog(logId);
-      if (currentUser) loadUserData(currentUser.id);
+      try {
+        await db.deleteLog(logId, currentUser.id);
+        loadUserData(currentUser.id);
+      } catch (e: any) {
+        alert(`No se pudo eliminar: ${e?.message ?? 'error desconocido'}`);
+      }
     }
   };
 

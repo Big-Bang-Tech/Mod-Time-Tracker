@@ -118,7 +118,8 @@ export class DBService {
         role: u.role,
         avatarSeed: u.avatarSeed,
         lastLogin: u.lastLogin,
-        projectOrder: u.projectOrder ?? []
+        projectOrder: u.projectOrder ?? [],
+        canModifyLogs: true
       }));
     }
     const data = await this.request('get_users');
@@ -129,7 +130,8 @@ export class DBService {
       role: u.role,
       avatarSeed: u.avatar_seed,
       lastLogin: u.last_login,
-      projectOrder: JSON.parse(u.project_order || '[]')
+      projectOrder: JSON.parse(u.project_order || '[]'),
+      canModifyLogs: u.can_modify_logs === undefined || u.can_modify_logs === null ? true : parseInt(u.can_modify_logs) === 1
     }));
   }
 
@@ -232,9 +234,12 @@ export class DBService {
     return this.request('save_log', 'POST', log);
   }
 
-  async deleteLog(id: string): Promise<void> {
+  async deleteLog(id: string, modifiedByUserId?: string): Promise<void> {
     if (isLocal() && !this._dbConnected) return;
-    return this.request('delete_log', 'DELETE', id);
+    const action = modifiedByUserId
+      ? `action=delete_log&id=${encodeURIComponent(id)}&modifiedByUserId=${encodeURIComponent(modifiedByUserId)}`
+      : `action=delete_log&id=${encodeURIComponent(id)}`;
+    return this.request(action, 'DELETE');
   }
 
   async updateLog(payload: { id: string; durationSeconds: number; date: string; comment?: string | null; modifiedByUserId: string }): Promise<void> {

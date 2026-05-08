@@ -33,6 +33,7 @@ const MovementsView: React.FC<MovementsViewProps> = ({ currentUser, onDeleteLog,
   const [filterDateTo, setFilterDateTo] = useState<string>('');
 
   const isAdmin = currentUser.role === Role.ADMIN;
+  const canModify = isAdmin || (currentUser.canModifyLogs ?? true);
 
   useEffect(() => {
     loadData();
@@ -270,7 +271,7 @@ const MovementsView: React.FC<MovementsViewProps> = ({ currentUser, onDeleteLog,
                                       </td>
                                       <td className="px-8 py-3 text-right">
                                         <div className="flex items-center justify-end gap-1">
-                                          {onEditLog && (
+                                          {onEditLog && canModify && (
                                             <button
                                               onClick={() => setEditingLog(entry)}
                                               className="text-mod-blue hover:text-mod-fg hover:bg-mod-blue w-8 h-8 flex items-center justify-center transition-all"
@@ -288,13 +289,15 @@ const MovementsView: React.FC<MovementsViewProps> = ({ currentUser, onDeleteLog,
                                               <span className="material-symbols-outlined text-sm">history</span>
                                             </button>
                                           )}
-                                          <button 
-                                            onClick={() => { if(confirm('¿Eliminar esta sesión individual?')) { onDeleteLog(entry.id); setTimeout(loadData, 300); } }}
-                                            className="text-red-500 hover:text-mod-fg hover:bg-red-600 w-8 h-8 flex items-center justify-center transition-all"
-                                            title="Borrar Sesión"
-                                          >
-                                            <span className="material-symbols-outlined text-sm">delete</span>
-                                          </button>
+                                          {canModify && (
+                                            <button
+                                              onClick={() => { if(confirm('¿Eliminar esta sesión individual?')) { onDeleteLog(entry.id); setTimeout(loadData, 300); } }}
+                                              className="text-red-500 hover:text-mod-fg hover:bg-red-600 w-8 h-8 flex items-center justify-center transition-all"
+                                              title="Borrar Sesión"
+                                            >
+                                              <span className="material-symbols-outlined text-sm">delete</span>
+                                            </button>
+                                          )}
                                         </div>
                                       </td>
                                     </tr>

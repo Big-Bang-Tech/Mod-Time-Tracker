@@ -128,6 +128,17 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
     }
   };
 
+  const handleToggleCanModifyLogs = async (user: User) => {
+    const next = !(user.canModifyLogs ?? true);
+    setUsers(prev => prev.map(u => u.id === user.id ? { ...u, canModifyLogs: next } : u));
+    try {
+      await db.saveUser({ ...user, canModifyLogs: next });
+    } catch (e) {
+      setUsers(prev => prev.map(u => u.id === user.id ? { ...u, canModifyLogs: !next } : u));
+      alert('No se pudo guardar el permiso. Revisa la conexión.');
+    }
+  };
+
   const getUserStats = (userId: string) => {
     const userLogs = logs.filter(l => l.userId === userId);
     const userProjects = projects.filter(p => p.userId === userId);
@@ -173,6 +184,7 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
                 <th className="px-8 py-6">Operador / Identificador</th>
                 <th className="px-8 py-6">Nivel Acceso</th>
                 <th className="px-8 py-6">Carga Operativa</th>
+                <th className="px-8 py-6">Editar Logs</th>
                 <th className="px-8 py-6 text-right">Terminal</th>
               </tr>
             </thead>
@@ -221,6 +233,26 @@ const AdminView: React.FC<AdminViewProps> = ({ type, onUserSelect, onProjectSele
                         <span className="text-mod-fg font-mono text-sm">{stats.hours} <span className="text-[9px] text-slate-500 font-sans">TOTAL</span></span>
                         <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">{stats.projectsCount} Proyectos asignados</span>
                       </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      {user.role === Role.ADMIN ? (
+                        <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">— Admin —</span>
+                      ) : (
+                        (() => {
+                          const enabled = user.canModifyLogs ?? true;
+                          return (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleToggleCanModifyLogs(user); }}
+                              role="switch"
+                              aria-checked={enabled}
+                              className={`relative h-6 w-12 flex-shrink-0 border transition-colors ${enabled ? 'bg-mod-blue border-mod-blue' : 'bg-mod-dark border-mod-border'}`}
+                              title={enabled ? 'Permiso activado · clic para desactivar' : 'Permiso desactivado · clic para activar'}
+                            >
+                              <span className={`absolute top-0.5 h-4 w-4 bg-mod-fg transition-all ${enabled ? 'left-[26px]' : 'left-0.5'}`} />
+                            </button>
+                          );
+                        })()
+                      )}
                     </td>
                     <td className="px-8 py-6 text-right">
                       <div className="flex justify-end gap-2 opacity-40 group-hover:opacity-100 transition-opacity">

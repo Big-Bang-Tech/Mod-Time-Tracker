@@ -39,14 +39,16 @@ try {
 try {
     // 1. Tabla de Usuarios
     $pdo->exec("CREATE TABLE IF NOT EXISTS users (
-        id VARCHAR(50) PRIMARY KEY, 
-        username VARCHAR(100) UNIQUE, 
-        password VARCHAR(255), 
-        role VARCHAR(20), 
-        avatar_seed VARCHAR(100), 
-        last_login DATETIME, 
-        project_order TEXT
+        id VARCHAR(50) PRIMARY KEY,
+        username VARCHAR(100) UNIQUE,
+        password VARCHAR(255),
+        role VARCHAR(20),
+        avatar_seed VARCHAR(100),
+        last_login DATETIME,
+        project_order TEXT,
+        can_modify_logs TINYINT(1) DEFAULT 1
     ) ENGINE=InnoDB;");
+    try { $pdo->exec("ALTER TABLE users ADD COLUMN can_modify_logs TINYINT(1) DEFAULT 1"); } catch (Exception $e) {}
 
     // 2. Tabla de Proyectos (Metadatos Globales)
     $pdo->exec("CREATE TABLE IF NOT EXISTS projects (
@@ -114,6 +116,23 @@ try {
     }
 } catch (Exception $e) {}
 
+// Comprueba si $modifierId puede modificar/borrar $logId.
+// Permite a ADMIN siempre. Permite al dueño solo si users.can_modify_logs = 1.
+function canUserModifyLog(PDO $pdo, string $logId, ?string $modifierId): bool {
+    if (!$modifierId) return false;
+    $u = $pdo->prepare("SELECT role, can_modify_logs FROM users WHERE id = ?");
+    $u->execute([$modifierId]);
+    $userRow = $u->fetch(PDO::FETCH_ASSOC);
+    if (!$userRow) return false;
+    if (($userRow['role'] ?? '') === 'ADMIN') return true;
+    $l = $pdo->prepare("SELECT user_id FROM logs WHERE id = ?");
+    $l->execute([$logId]);
+    $logRow = $l->fetch(PDO::FETCH_ASSOC);
+    if (!$logRow) return false;
+    if ($logRow['user_id'] !== $modifierId) return false;
+    return (int)($userRow['can_modify_logs'] ?? 1) === 1;
+}
+
 $action = $_GET['action'] ?? 'status';
 
 switch($action) {
@@ -127,8 +146,9 @@ switch($action) {
     
     case 'save_user':
         $data = json_decode(file_get_contents('php://input'), true);
-        $stmt = $pdo->prepare("INSERT INTO users (id, username, password, role, avatar_seed, last_login, project_order) VALUES (?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE username=VALUES(username), password=VALUES(password), role=VALUES(role), last_login=VALUES(last_login), project_order=VALUES(project_order)");
-        $stmt->execute([$data['id'], $data['username'], $data['password'], $data['role'], $data['avatarSeed'], $data['lastLogin'], json_encode($data['projectOrder'] ?? [])]);
+        $canModify = isset($data['canModifyLogs']) ? ($data['canModifyLogs'] ? 1 : 0) : 1;
+        $stmt = $pdo->prepare("INSERT INTO users (id, username, password, role, avatar_seed, last_login, project_order, can_modify_logs) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE username=VALUES(username), password=VALUES(password), role=VALUES(role), last_login=VALUES(last_login), project_order=VALUES(project_order), can_modify_logs=VALUES(can_modify_logs)");
+        $stmt->execute([$data['id'], $data['username'], $data['password'], $data['role'], $data['avatarSeed'], $data['lastLogin'], json_encode($data['projectOrder'] ?? []), $canModify]);
         echo json_encode(["status" => "ok"]);
         break;
 
@@ -210,6 +230,11 @@ switch($action) {
         $newComment = $data['comment'] ?? null;
         $modifiedByUserId = $data['modifiedByUserId'] ?? null;
         if (!$logId) { echo json_encode(["error" => "ID_REQUIRED"]); break; }
+        if (!canUserModifyLog($pdo, $logId, $modifiedByUserId)) {
+            http_response_code(403);
+            echo json_encode(["error" => "FORBIDDEN", "details" => "El usuario no tiene permiso para modificar este registro."]);
+            break;
+        }
         $current = $pdo->prepare("SELECT duration_seconds, date_str, comment FROM logs WHERE id = ?");
         $current->execute([$logId]);
         $row = $current->fetch(PDO::FETCH_ASSOC);
@@ -257,6 +282,13 @@ switch($action) {
 
     case 'delete_log':
         $id = $_GET['id'] ?? '';
+        $modifiedByUserId = $_GET['modifiedByUserId'] ?? null;
+        if (!$id) { echo json_encode(["error" => "ID_REQUIRED"]); break; }
+        if (!canUserModifyLog($pdo, $id, $modifiedByUserId)) {
+            http_response_code(403);
+            echo json_encode(["error" => "FORBIDDEN", "details" => "El usuario no tiene permiso para borrar este registro."]);
+            break;
+        }
         $stmt = $pdo->prepare("DELETE FROM logs WHERE id = ?");
         $stmt->execute([$id]);
         echo json_encode(["status" => "ok"]);

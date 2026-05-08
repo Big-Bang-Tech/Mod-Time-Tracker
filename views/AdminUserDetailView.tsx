@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { User, Project, DailyLog } from '../types';
+import { User, Project, DailyLog, Role } from '../types';
 import { db } from '../services/db';
 
 const PAGE_SIZE = 10;
@@ -13,6 +13,8 @@ interface AdminUserDetailViewProps {
 const AdminUserDetailView: React.FC<AdminUserDetailViewProps> = ({ user, onBack, onProjectClick }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [logs, setLogs] = useState<DailyLog[]>([]);
+  const [canModifyLogs, setCanModifyLogs] = useState<boolean>(user.canModifyLogs ?? true);
+  const [savingPerm, setSavingPerm] = useState(false);
 
   const [filterProjectId, setFilterProjectId] = useState<string>('ALL');
   const [filterDateFrom, setFilterDateFrom] = useState<string>('');
@@ -21,7 +23,22 @@ const AdminUserDetailView: React.FC<AdminUserDetailViewProps> = ({ user, onBack,
 
   useEffect(() => {
     loadUserData();
+    setCanModifyLogs(user.canModifyLogs ?? true);
   }, [user]);
+
+  const togglePermission = async () => {
+    const next = !canModifyLogs;
+    setCanModifyLogs(next);
+    setSavingPerm(true);
+    try {
+      await db.saveUser({ ...user, canModifyLogs: next });
+    } catch (e) {
+      setCanModifyLogs(!next);
+      alert('No se pudo guardar el permiso. Revisa la conexión.');
+    } finally {
+      setSavingPerm(false);
+    }
+  };
 
   const loadUserData = async () => {
     const userProjects = await db.getProjects(user.id);
@@ -166,6 +183,30 @@ const AdminUserDetailView: React.FC<AdminUserDetailViewProps> = ({ user, onBack,
           <p className="text-lg text-red-500 font-black uppercase tracking-tighter">{user.role}</p>
         </div>
       </div>
+
+      {user.role !== Role.ADMIN && (
+        <div className="bg-mod-card border border-mod-border p-8 mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-2">Permisos del Operador</p>
+            <p className="text-mod-fg text-sm font-bold uppercase tracking-tight">Edición y borrado de movimientos propios</p>
+            <p className="text-slate-500 text-[10px] mt-2 max-w-xl">
+              Si está desactivado, el operador no podrá editar ni borrar sus propios registros desde la vista Movimientos. Los administradores siempre conservan ambas capacidades.
+            </p>
+          </div>
+          <button
+            onClick={togglePermission}
+            disabled={savingPerm}
+            role="switch"
+            aria-checked={canModifyLogs}
+            className={`relative h-8 w-16 flex-shrink-0 border transition-colors ${canModifyLogs ? 'bg-mod-blue border-mod-blue' : 'bg-mod-dark border-mod-border'} ${savingPerm ? 'opacity-50 cursor-wait' : 'cursor-pointer'}`}
+            title={canModifyLogs ? 'Permiso activado · clic para desactivar' : 'Permiso desactivado · clic para activar'}
+          >
+            <span
+              className={`absolute top-0.5 h-6 w-6 bg-mod-fg transition-all ${canModifyLogs ? 'left-[34px]' : 'left-0.5'}`}
+            />
+          </button>
+        </div>
+      )}
 
       {/* Gráfico circular: inversión temporal por proyecto */}
       <div className="bg-mod-card border border-mod-border p-8 mb-10">

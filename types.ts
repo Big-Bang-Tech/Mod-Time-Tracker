@@ -25,7 +25,8 @@ export interface User {
   role: Role;
   avatarSeed: string;
   lastLogin: string;
-  projectOrder?: string[]; 
+  projectOrder?: string[];
+  canModifyLogs?: boolean;
 }
 
 // Fixed: Added creatorId and isHiddenForUser to the Project interface to satisfy TypeScript checks in App.tsx and reflect the backend data structure

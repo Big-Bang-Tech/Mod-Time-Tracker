@@ -88,12 +88,15 @@ Vite proxea `/api.php` a `http://localhost:8080`, por lo que el frontend en dev 
 | Ver / iniciar / parar cronómetros propios | ✅ | — |
 | Crear proyectos privados | ✅ | ✅ |
 | Crear proyectos globales | — | ✅ |
-| Editar / eliminar sus propios logs | ✅ | ✅ |
+| Editar / eliminar sus propios logs | ⚙️ configurable | ✅ |
 | Editar / eliminar logs de otros usuarios | — | ✅ |
 | Ver historial de modificaciones de logs | — | ✅ |
 | Ver Panel Global, Operadores, Estadísticas | — | ✅ |
 | Buscar usuarios y proyectos globales | — | ✅ |
 | Activar / desactivar proyectos globales | — | ✅ |
+| Activar / desactivar el permiso de modificar logs de otros usuarios | — | ✅ |
+
+> El permiso de un USER para modificar sus propios logs lo controla el admin por usuario (ver [Permiso de edición de logs por operador](#permiso-de-edición-de-logs-por-operador)). Por defecto está activado para mantener compatibilidad con el comportamiento previo.
 
 ---
 
@@ -199,12 +202,29 @@ Resumen ejecutivo de todo el sistema:
 
 ### Operadores (`AdminView` filtrado a usuarios)
 
-Lista completa de usuarios. Clic en cualquiera → `AdminUserDetailView`:
+Lista completa de usuarios con una columna **Editar Logs** que muestra un toggle por operador (los ADMIN aparecen como "— Admin —", el permiso no aplica). Clic en el toggle → activa o desactiva el permiso del operador para editar/borrar sus propios registros (ver siguiente sección).
+
+Clic en el nombre del operador → `AdminUserDetailView`:
 
 - Estadísticas individuales (horas totales, proyectos activos, último login)
 - Listado de proyectos en los que el operador ha trabajado, con su porcentaje
 - Acceso al historial completo de logs del operador, con capacidad de **editar o eliminar logs ajenos**
 - Cualquier modificación queda registrada en `log_modification_history` con marca temporal y `modified_by_user_id`
+- Tarjeta **Permisos del Operador** con el toggle de edición de logs propios
+
+### Permiso de edición de logs por operador
+
+El admin controla por usuario si éste puede modificar sus propios registros. Hay dos puntos de acceso al toggle:
+
+- **Listado de Operadores** — columna "Editar Logs" con un switch compacto, ideal para ajustes rápidos sobre varios usuarios.
+- **Detalle del Operador** — tarjeta "Permisos del Operador" con el mismo switch en formato grande.
+
+**Comportamiento:**
+- Activado (por defecto) → el operador ve los botones editar/borrar en su vista Movimientos sobre sus propios logs.
+- Desactivado → los botones desaparecen. Si el operador intentara forzar la petición vía API, el backend responde `403 FORBIDDEN`.
+- Los administradores **siempre** mantienen edición y borrado, sin importar este flag.
+- Persistido en la columna `users.can_modify_logs`. Los usuarios existentes y nuevos arrancan con `1` (activado) para no romper compatibilidad.
+- La sesión del operador afectado se refresca automáticamente cada 15 segundos contra el servidor, así que el cambio se propaga sin necesidad de cerrar sesión.
 
 ### Proyectos Global (`AdminView` filtrado a proyectos)
 
@@ -257,7 +277,7 @@ Internamente todos los tokens (`mod-dark`, `mod-card`, `mod-border`, `mod-fg`, `
 | Evento | Frecuencia |
 |---|---|
 | Refresco visual del cronómetro | 1 s |
-| Sincronización con servidor | 15 s |
+| Sincronización con servidor (proyectos, logs y datos del usuario actual) | 15 s |
 | Cierre automático del día | Al detectar cambio de fecha (medianoche) |
 | Cierre manual del día | Botón "Sincronizar" en Reportes / Header |
 
@@ -285,6 +305,7 @@ Esquema InnoDB. Todas las tablas se autocrean y autoextienden en la primera peti
 | `avatar_seed` | VARCHAR(100) | Semilla DiceBear |
 | `last_login` | DATETIME | |
 | `project_order` | TEXT | JSON array con orden de proyectos |
+| `can_modify_logs` | TINYINT(1) DEFAULT 1 | Si 0, el USER no puede editar/borrar sus propios logs. Los ADMIN siempre pueden. |
 
 ### `projects`
 | Columna | Tipo |
@@ -331,8 +352,8 @@ Todos los endpoints son `GET` o `POST` a `api.php?action=<nombre>`.
 | `delete_project` | Elimina un proyecto |
 | `get_logs?userId=X` | Logs históricos de un usuario (admin: todos) |
 | `save_log` | Crea un log nuevo |
-| `update_log` | Edita un log existente, registra historial |
-| `delete_log` | Elimina un log |
+| `update_log` | Edita un log existente, registra historial. Requiere `modifiedByUserId` y valida permisos (admin o dueño con `can_modify_logs=1`); si no, responde `403 FORBIDDEN`. |
+| `delete_log` | Elimina un log. Requiere `modifiedByUserId` por query string. Misma validación de permisos que `update_log`. |
 | `get_log_modification_history?logId=X` | Historial de ediciones de un log |
 
 CORS abierto a `*` (apropiado solo si el dominio se sirve detrás del mismo origen en producción).

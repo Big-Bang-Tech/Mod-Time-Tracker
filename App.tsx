@@ -167,6 +167,7 @@ const App: React.FC = () => {
   const handleLogin = (user: User) => {
     setCurrentUser(user);
     if (user.role === Role.ADMIN) setCurrentView(View.ADMIN_DASHBOARD);
+    else setCurrentView(View.DASHBOARD);
     localStorage.setItem('mod_tracker_session', JSON.stringify(user));
   };
 

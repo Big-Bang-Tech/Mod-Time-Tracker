@@ -47,6 +47,17 @@ const WeeklyHistoryView: React.FC<WeeklyHistoryViewProps> = ({ currentUser }) =>
     return `${h}h ${m}m`;
   };
 
+  const formatDecimalHours = (seconds: number) => (Math.max(0, seconds) / 3600).toFixed(2);
+
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const copyDecimal = async (key: string, seconds: number) => {
+    try {
+      await navigator.clipboard.writeText(formatDecimalHours(seconds));
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(prev => (prev === key ? null : prev)), 1500);
+    } catch (_) {}
+  };
+
   const getUserWeeks = (userId: string): [string, WeekData][] => {
     const userLogs = data.logs.filter((l) => l.userId === userId);
     const weeks: Record<string, WeekData> = {};
@@ -170,20 +181,72 @@ const WeeklyHistoryView: React.FC<WeeklyHistoryViewProps> = ({ currentUser }) =>
                   <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-1">Rango</p>
                   <p className="text-mod-fg font-mono text-sm">{range.start.toLocaleDateString()} – {range.end.toLocaleDateString()}</p>
                 </div>
-                <div className="mb-6">
-                  <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-1">Total</p>
-                  <p className="text-mod-blue font-mono font-black text-2xl">{formatTime(weekDetail.total)}</p>
+
+                <div className="mb-6 flex items-end justify-between gap-4 border-b border-mod-border pb-5">
+                  <div>
+                    <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-1">Total</p>
+                    <p className="text-mod-blue font-mono font-black text-2xl">{formatTime(weekDetail.total)}</p>
+                  </div>
+                  {(() => {
+                    const totalKey = `total-${selectedWeek!.userId}-${selectedWeek!.key}`;
+                    const isCopied = copiedKey === totalKey;
+                    return (
+                      <button
+                        onClick={() => copyDecimal(totalKey, weekDetail.total)}
+                        title={isCopied ? '¡Copiado!' : `Copiar "${formatDecimalHours(weekDetail.total)}" al portapapeles`}
+                        className={`flex flex-col items-start group/copy border px-3 py-2 transition-all ${
+                          isCopied
+                            ? 'border-emerald-500 bg-emerald-500/10'
+                            : 'border-mod-border hover:border-mod-blue hover:bg-mod-blue/5'
+                        }`}
+                      >
+                        <span className={`text-[8px] font-bold uppercase tracking-widest ${isCopied ? 'text-emerald-400' : 'text-slate-600 group-hover/copy:text-mod-blue'}`}>
+                          {isCopied ? '✓ Copiado' : 'Decimal'}
+                        </span>
+                        <span className={`font-mono font-bold text-base flex items-center gap-1.5 ${isCopied ? 'text-emerald-400' : 'text-mod-fg'}`}>
+                          {formatDecimalHours(weekDetail.total)}
+                          <span className="material-symbols-outlined text-[14px] opacity-50 group-hover/copy:opacity-100">
+                            {isCopied ? 'check' : 'content_copy'}
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  })()}
                 </div>
+
                 <div>
                   <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest mb-3">Por proyecto</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {Object.entries(weekDetail.projects).map(([name, seconds]) => (
-                      <div key={name} className="flex justify-between items-center p-3 border border-mod-border bg-mod-dark/50">
-                        <span className="text-mod-fg text-[10px] font-bold uppercase truncate pr-2">{name}</span>
-                        <span className="text-mod-blue font-mono font-bold text-xs shrink-0">{formatTime(seconds)}</span>
-                      </div>
-                    ))}
-                  </div>
+                  <ul className="divide-y divide-mod-border border border-mod-border">
+                    {Object.entries(weekDetail.projects)
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([name, seconds]) => {
+                        const proj = data.projects.find(p => p.name === name);
+                        const colorClass = proj?.color ?? 'vibrant-blue';
+                        const lineKey = `line-${selectedWeek!.userId}-${selectedWeek!.key}-${name}`;
+                        const isCopied = copiedKey === lineKey;
+                        return (
+                          <li key={name} className="flex items-center gap-3 px-3 py-2.5 hover:bg-mod-fg/[0.03] transition-colors">
+                            <div className={`w-1 h-7 ${colorClass} flex-shrink-0`}></div>
+                            <span className="text-mod-fg text-[11px] font-bold uppercase truncate flex-1">{name}</span>
+                            <span className="text-mod-blue font-mono font-bold text-xs flex-shrink-0 w-20 text-right">{formatTime(seconds)}</span>
+                            <button
+                              onClick={() => copyDecimal(lineKey, seconds)}
+                              title={isCopied ? '¡Copiado!' : `Copiar "${formatDecimalHours(seconds)}"`}
+                              className={`flex items-center gap-1 px-2 py-1 border text-xs font-mono font-bold transition-all flex-shrink-0 ${
+                                isCopied
+                                  ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
+                                  : 'border-mod-border text-mod-fg hover:border-mod-blue hover:bg-mod-blue/5'
+                              }`}
+                            >
+                              <span>{formatDecimalHours(seconds)}</span>
+                              <span className="material-symbols-outlined text-[14px] opacity-50">
+                                {isCopied ? 'check' : 'content_copy'}
+                              </span>
+                            </button>
+                          </li>
+                        );
+                      })}
+                  </ul>
                 </div>
               </div>
             </div>

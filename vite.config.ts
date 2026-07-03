@@ -7,7 +7,7 @@ export default defineConfig({
   base: './', // Genera rutas relativas para los assets
   server: {
     proxy: {
-      '/api.php': 'http://localhost:8080',
+      '/api.php': 'http://localhost:8081',
     },
   },
   define: {

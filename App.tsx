@@ -29,7 +29,7 @@ interface LocalProject extends Project {
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [currentView, setCurrentView] = useState<View>(View.DASHBOARD);
+  const [currentView, setCurrentView] = useState<View>(View.REPORTS);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
   const [isStartWithTimeModalOpen, setIsStartWithTimeModalOpen] = useState(false);
@@ -47,6 +47,8 @@ const App: React.FC = () => {
   const projectsRef = useRef<LocalProject[]>([]);
   const wakeLockRef = useRef<any>(null);
   const isCommittingRef = useRef(false);
+  // Fecha (toDateString) en la que ya se hizo el auto-guardado de las 23:59
+  const autoSaveDoneRef = useRef<string | null>(null);
 
   useEffect(() => { projectsRef.current = projects; }, [projects]);
 
@@ -72,6 +74,7 @@ const App: React.FC = () => {
         const user = JSON.parse(savedSession);
         setCurrentUser(user);
         if (user.role === Role.ADMIN) setCurrentView(View.ADMIN_DASHBOARD);
+        else setCurrentView(View.REPORTS);
       }
     });
   }, []);
@@ -167,11 +170,9 @@ const App: React.FC = () => {
   const handleLogin = (user: User) => {
     setCurrentUser(user);
     if (user.role === Role.ADMIN) setCurrentView(View.ADMIN_DASHBOARD);
-    else setCurrentView(View.DASHBOARD);
+    else setCurrentView(View.REPORTS);
     localStorage.setItem('mod_tracker_session', JSON.stringify(user));
   };
-
-  const lastCommittedDateRef = useRef<string | null>(null);
 
   const commitDailyLogs = useCallback(async () => {
     if (!currentUser) return;
@@ -180,8 +181,6 @@ const App: React.FC = () => {
 
     try {
       const today = new Date().toDateString();
-
-      if (lastCommittedDateRef.current === today) return;
 
       const projectsToCommit = projectsRef.current.filter(p => p.currentDaySeconds > 0);
       if (projectsToCommit.length === 0) return;
@@ -219,8 +218,6 @@ const App: React.FC = () => {
       }
 
       if (committedIds.size > 0) {
-        lastCommittedDateRef.current = today;
-
         setProjects(prev => prev.map(p =>
           committedIds.has(p.id)
             ? { ...p, status: 'Active' as const, runningSince: null, currentDaySeconds: 0, sessionComment: undefined }
@@ -245,16 +242,26 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const today = new Date().toDateString();
-      if (today !== lastSaveDate) { 
-        commitDailyLogs(); 
-        setLastSaveDate(today); 
+      const now = new Date();
+      const today = now.toDateString();
+
+      // Cambio de día: reseteamos el marcador para permitir el auto-guardado del nuevo día
+      if (today !== lastSaveDate) {
+        setLastSaveDate(today);
       }
-      
+
+      // Guardado automático a las 23:59: persiste el tiempo del día ACTUAL antes de
+      // cruzar medianoche, de modo que quede registrado en la fecha correcta aunque
+      // el usuario no haya pulsado "Sincronizar". Solo una vez por día.
+      if (now.getHours() === 23 && now.getMinutes() === 59 && autoSaveDoneRef.current !== today) {
+        autoSaveDoneRef.current = today;
+        commitDailyLogs();
+      }
+
       const isAnyRunning = projectsRef.current.some(p => p.status === 'Running');
       handleWakeLock(isAnyRunning);
 
-      setProjects(prev => prev.map(p => 
+      setProjects(prev => prev.map(p =>
         p.status === 'Running' ? { ...p, currentDaySeconds: p.currentDaySeconds + 1 } : p
       ));
     }, 1000);
@@ -327,8 +334,10 @@ const App: React.FC = () => {
     if (!target) return;
     
     const newHiddenStatus = !target.isHiddenForUser;
-      
-    const updated = { ...target, userId: currentUser.id, isHiddenForUser: newHiddenStatus };
+    const isRunning = target.status === 'Running' || !!target.runningSince;
+    const rebasedSince = isRunning ? Date.now().toString() : (target.runningSince ?? null);
+
+    const updated = { ...target, userId: currentUser.id, isHiddenForUser: newHiddenStatus, runningSince: rebasedSince };
     try {
       await db.saveProject(updated);
       loadUserData(currentUser.id);
@@ -390,11 +399,16 @@ const App: React.FC = () => {
 
   const handleCommentChange = async (projectId: string, sessionComment: string) => {
     if (!currentUser) return;
-    const updated = projects.map(p => p.id === projectId ? { ...p, sessionComment } : p);
-    setProjects(updated as LocalProject[]);
+    const target = projectsRef.current.find(p => p.id === projectId);
+    if (!target) return;
+    const isRunning = target.status === 'Running' || !!target.runningSince;
+    // Rebasar el arranque al persistir un timer en marcha para no duplicar tiempo.
+    const rebasedSince = isRunning ? Date.now().toString() : (target.runningSince ?? null);
+    setProjects(prev => prev.map(p => p.id === projectId
+      ? { ...p, sessionComment, runningSince: rebasedSince }
+      : p));
     try {
-      const p = updated.find(x => x.id === projectId);
-      if (p) await db.saveProject({ ...p, userId: currentUser.id });
+      await db.saveProject({ ...target, userId: currentUser.id, sessionComment, runningSince: rebasedSince });
     } catch (e) { console.error(e); }
   };
 
@@ -412,14 +426,18 @@ const App: React.FC = () => {
 
   const handleAdjustTimer = async (projectId: string, deltaSeconds: number) => {
     if (!currentUser) return;
-    const target = projects.find(p => p.id === projectId);
+    const target = projectsRef.current.find(p => p.id === projectId);
     if (!target) return;
+    const isRunning = target.status === 'Running' || !!target.runningSince;
+    // Si está en marcha, rebasar el arranque a "ahora" para que el servidor no
+    // vuelva a sumar el tiempo ya transcurrido (evita horas fantasma).
+    const rebasedSince = isRunning ? Date.now().toString() : (target.runningSince ?? null);
     const newSeconds = Math.max(0, Math.floor((target.currentDaySeconds || 0) + deltaSeconds));
-    const updated = projects.map(p => p.id === projectId ? { ...p, currentDaySeconds: newSeconds } : p);
-    setProjects(updated as LocalProject[]);
+    setProjects(prev => prev.map(p => p.id === projectId
+      ? { ...p, currentDaySeconds: newSeconds, runningSince: rebasedSince }
+      : p));
     try {
-      const p = updated.find(x => x.id === projectId);
-      if (p) await db.saveProject({ ...p, userId: currentUser.id, currentDaySeconds: newSeconds });
+      await db.saveProject({ ...target, userId: currentUser.id, currentDaySeconds: newSeconds, runningSince: rebasedSince });
     } catch (e) { console.error(e); }
   };
 

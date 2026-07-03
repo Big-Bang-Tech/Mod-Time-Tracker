@@ -142,7 +142,7 @@ export class DBService {
 
   async deleteUser(id: string): Promise<void> {
     if (isLocal() && !this._dbConnected) return;
-    return this.request('delete_log', 'DELETE', id);
+    return this.request('delete_user', 'DELETE', id);
   }
 
   async getProjects(userId?: string): Promise<any[]> {

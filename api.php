@@ -16,13 +16,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// Configuración desde variables de entorno (fallback a valores por defecto)
-$host    = getenv('DB_HOST')    ?: '91.242.131.16';
-$port    = getenv('DB_PORT')    ?: '3306';
-$db      = getenv('DB_NAME')    ?: 'mod_tracker_db';
-$user    = getenv('DB_USER')    ?: 'mod_user';
-$pass    = getenv('DB_PASS')    ?: '^k256Ops7';
-$charset = getenv('DB_CHARSET') ?: 'utf8mb4';
+// Configuración: prioridad a variables de entorno del servidor; si no existen,
+// se lee de config.php (archivo NO versionado, ver config.example.php).
+// No se incluyen credenciales por defecto en el código fuente.
+$fileConfig = is_file(__DIR__ . '/config.php') ? (include_once __DIR__ . '/config.php') : [];
+if (!is_array($fileConfig)) {
+    $fileConfig = [];
+}
+
+function cfg(string $key, array $fileConfig, ?string $default = null): ?string {
+    $env = getenv($key);
+    if ($env !== false && $env !== '') {
+        return $env;
+    }
+    if (isset($fileConfig[$key]) && $fileConfig[$key] !== '') {
+        return (string)$fileConfig[$key];
+    }
+    return $default;
+}
+
+$host    = cfg('DB_HOST', $fileConfig);
+$port    = cfg('DB_PORT', $fileConfig, '3306');
+$db      = cfg('DB_NAME', $fileConfig);
+$user    = cfg('DB_USER', $fileConfig);
+$pass    = cfg('DB_PASS', $fileConfig);
+$charset = cfg('DB_CHARSET', $fileConfig, 'utf8mb4');
+
+if (!$host || !$db || !$user) {
+    echo json_encode([
+        "error" => "DB_CONFIG_MISSING",
+        "details" => "Faltan credenciales de BD. Define variables de entorno (DB_HOST, DB_NAME, DB_USER, DB_PASS) o crea config.php a partir de config.example.php."
+    ]);
+    exit;
+}
 
 try {
     $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=$charset";
@@ -292,6 +318,69 @@ switch($action) {
         $stmt = $pdo->prepare("DELETE FROM logs WHERE id = ?");
         $stmt->execute([$id]);
         echo json_encode(["status" => "ok"]);
+        break;
+
+    case 'delete_user':
+        $id = $_GET['id'] ?? '';
+        if (!$id) { echo json_encode(["error" => "ID_REQUIRED"]); break; }
+        $pdo->beginTransaction();
+        // Borrar historial de modificaciones de los logs del usuario, luego sus datos
+        $pdo->prepare("DELETE h FROM log_modification_history h JOIN logs l ON l.id = h.log_id WHERE l.user_id = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM logs WHERE user_id = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM user_projects WHERE user_id = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM users WHERE id = ?")->execute([$id]);
+        $pdo->commit();
+        echo json_encode(["status" => "ok"]);
+        break;
+
+    case 'cron_autosave':
+        // Guardado automático de fin de día (pensado para un cron a las 23:59).
+        // Vuelca a `logs` el tiempo acumulado de cada usuario/proyecto y resetea los
+        // contadores, de modo que nada se pierda aunque nadie tenga la app abierta.
+        // Protegido con un token secreto (CRON_SECRET).
+        $expectedToken = cfg('CRON_SECRET', $fileConfig, '');
+        $providedToken = $_GET['token'] ?? '';
+        if ($expectedToken === '' || !hash_equals($expectedToken, $providedToken)) {
+            http_response_code(403);
+            echo json_encode(["error" => "FORBIDDEN", "details" => "Token de cron inválido o CRON_SECRET no configurado."]);
+            break;
+        }
+        // Fecha del día que se cierra, en el mismo formato que usa el frontend (toDateString).
+        // Se puede forzar con &date=... ; por defecto la fecha actual del servidor.
+        $dateStr = $_GET['date'] ?? date('D M d Y');
+        $nowMillis = (int) round(microtime(true) * 1000);
+
+        $rows = $pdo->query("
+            SELECT up.user_id, up.project_id, up.running_since, up.current_day_seconds,
+                   up.session_comment, p.name AS project_name
+            FROM user_projects up
+            JOIN projects p ON p.id = up.project_id
+            WHERE up.current_day_seconds > 0 OR up.running_since IS NOT NULL
+        ")->fetchAll();
+
+        $committed = 0;
+        $pdo->beginTransaction();
+        foreach ($rows as $r) {
+            $seconds = (int) $r['current_day_seconds'];
+            // Si el cronómetro estaba en marcha, sumar el tiempo transcurrido desde el arranque
+            if (!empty($r['running_since'])) {
+                $start = (int) $r['running_since'];
+                if ($start > 0 && $nowMillis > $start) {
+                    $seconds += intdiv($nowMillis - $start, 1000);
+                }
+            }
+            if ($seconds <= 0) { continue; }
+
+            $logId = 'AUTO-' . bin2hex(random_bytes(6)) . '-' . $committed;
+            $ins = $pdo->prepare("INSERT INTO logs (id, user_id, project_id, project_name, date_str, duration_seconds, status, comment) VALUES (?,?,?,?,?,?,?,?)");
+            $ins->execute([$logId, $r['user_id'], $r['project_id'], $r['project_name'], $dateStr, $seconds, 'NORMAL', $r['session_comment'] ?? null]);
+
+            $upd = $pdo->prepare("UPDATE user_projects SET running_since = NULL, current_day_seconds = 0, session_comment = NULL WHERE user_id = ? AND project_id = ?");
+            $upd->execute([$r['user_id'], $r['project_id']]);
+            $committed++;
+        }
+        $pdo->commit();
+        echo json_encode(["status" => "ok", "committed" => $committed, "date" => $dateStr]);
         break;
 
     case 'get_log_modification_history':

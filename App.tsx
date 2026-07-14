@@ -39,6 +39,7 @@ const App: React.FC = () => {
   const [selectedAdminUser, setSelectedAdminUser] = useState<User | null>(null);
   const [showHidden, setShowHidden] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [pendingNewProjectId, setPendingNewProjectId] = useState<string | null>(null);
   
   const [projects, setProjects] = useState<LocalProject[]>([]);
   const [historicalLogs, setHistoricalLogs] = useState<DailyLog[]>([]);
@@ -276,28 +277,24 @@ const App: React.FC = () => {
     const isRunning = target.status === 'Running';
     const startTimeStamp = Date.now().toString();
 
-    const updatedProjects = projects.map(p => {
+    const applyToggle = (p: LocalProject): LocalProject => {
       if (p.id === projectId) {
-        return { 
-          ...p, 
-          status: isRunning ? 'Active' : 'Running',
-          runningSince: isRunning ? null : startTimeStamp
-        };
+        return { ...p, status: (isRunning ? 'Active' : 'Running') as any, runningSince: isRunning ? null : startTimeStamp };
       }
       if (p.status === 'Running') {
-        return { ...p, status: 'Active', runningSince: null };
+        return { ...p, status: 'Active' as any, runningSince: null };
       }
       return p;
-    });
+    };
 
-    setProjects(updatedProjects as any);
+    // Forma funcional para no sobreescribir updates pendientes (ej: sessionComment de handleCommentChange)
+    setProjects(prev => prev.map(applyToggle));
 
+    // Para el guardado en BD usamos projects del closure; el COALESCE de SQL preserva session_comment si no se envía
+    const updatedForDb = projects.map(applyToggle);
     try {
-      for (const p of updatedProjects) {
-         await db.saveProject({
-           ...p,
-           userId: currentUser.id
-         });
+      for (const p of updatedForDb) {
+         await db.saveProject({ ...p, userId: currentUser.id });
       }
     } catch (e) {
       console.error("Error al persistir cronómetro", e);
@@ -307,14 +304,13 @@ const App: React.FC = () => {
   const handleStartWithPreset = async (projectId: string, initialSeconds: number) => {
     if (!currentUser) return;
     const startTimeStamp = Date.now().toString();
-    const updated = projects.map(p => {
-      if (p.id === projectId) {
-        return { ...p, status: 'Running', currentDaySeconds: initialSeconds, runningSince: startTimeStamp };
-      }
-      if (p.status === 'Running') return { ...p, status: 'Active', runningSince: null };
+    const applyPreset = (p: LocalProject): LocalProject => {
+      if (p.id === projectId) return { ...p, status: 'Running' as any, currentDaySeconds: initialSeconds, runningSince: startTimeStamp };
+      if (p.status === 'Running') return { ...p, status: 'Active' as any, runningSince: null };
       return p;
-    });
-    setProjects(updated as any);
+    };
+    setProjects(prev => prev.map(applyPreset));
+    const updated = projects.map(applyPreset);
     try {
       for (const p of updated) {
         await db.saveProject({
@@ -366,6 +362,7 @@ const App: React.FC = () => {
       await db.saveLog(finalLog);
       loadUserData(currentUser.id);
       setIsManualModalOpen(false);
+      setPendingNewProjectId(null);
     } catch (e) {
       alert("Error al inyectar datos manuales.");
     }
@@ -471,7 +468,6 @@ const App: React.FC = () => {
 
   const handleCreateProject = async (data: any) => {
     if (!currentUser) return;
-    const isAdmin = currentUser.role === Role.ADMIN;
     const newProject: LocalProject = { 
       id: `PJ-${Math.random().toString(36).substr(2, 6).toUpperCase()}`, 
       userId: currentUser.id,
@@ -483,9 +479,9 @@ const App: React.FC = () => {
       usageLevel: 0, 
       totalHours: '0h', 
       status: 'Active', 
-      department: isAdmin ? 'GLOBAL' : 'PRIVATE', 
+      department: data.isGlobal ? 'GLOBAL' : 'PRIVATE', 
       currentDaySeconds: 0,
-      isGlobal: isAdmin,
+      isGlobal: data.isGlobal ?? false,
       isHiddenForUser: false,
       runningSince: null,
       hiddenBy: [],
@@ -494,6 +490,7 @@ const App: React.FC = () => {
     
     try {
       await db.saveProject(newProject);
+      setPendingNewProjectId(newProject.id);
       setIsModalOpen(false);
       loadUserData(currentUser.id);
     } catch (e) {
@@ -521,9 +518,16 @@ const App: React.FC = () => {
   if (!currentUser) return <LoginView onLogin={handleLogin} />;
 
   const getHeaderProps = () => {
-    const totalDailySeconds = projects.reduce((acc, p) => acc + p.currentDaySeconds, 0);
+    const timerSeconds = projects.reduce((acc, p) => acc + p.currentDaySeconds, 0);
+    const todayStr = new Date().toDateString();
+    const manualSeconds = historicalLogs
+      .filter(log => log.status === 'MANUAL' && log.date === todayStr)
+      .reduce((acc, log) => acc + log.durationSeconds, 0);
+    const timerStr = formatTimerShort(timerSeconds);
+    const manualStr = manualSeconds > 0 ? ` \u00A0+${formatTimerShort(manualSeconds)}` : '';
+    const sessionLabel = timerStr + manualStr;
     switch (currentView) {
-      case View.DASHBOARD: return { title: 'Terminal', activeTime: formatTimerShort(totalDailySeconds), actionLabel: 'Sincronizar' };
+      case View.DASHBOARD: return { title: 'Terminal', activeTime: sessionLabel, actionLabel: 'Sincronizar' };
       case View.MOVEMENTS: return { title: 'Movimientos', actionLabel: 'Sincronizar' };
       case View.REPORTS: return { title: 'Reportes', actionLabel: 'Sincronizar' };
       case View.ADMIN_DASHBOARD: return { title: 'Panel Global', actionLabel: 'Acción' };
@@ -551,9 +555,18 @@ const App: React.FC = () => {
       );
     }
     switch (currentView) {
-      case View.DASHBOARD: return (
+      case View.DASHBOARD: {
+        const todayStr = new Date().toDateString();
+        const manualTodayByProject: Record<string, number> = {};
+        historicalLogs.forEach(log => {
+          if (log.status === 'MANUAL' && log.date === todayStr) {
+            manualTodayByProject[log.projectId] = (manualTodayByProject[log.projectId] || 0) + log.durationSeconds;
+          }
+        });
+        return (
         <DashboardGrid 
-          projects={projects} 
+          projects={projects}
+          manualTodayByProject={manualTodayByProject}
           currentUser={currentUser}
           showHidden={showHidden}
           onToggleTimer={handleToggleTimer} 
@@ -567,6 +580,7 @@ const App: React.FC = () => {
           onAdjustTimer={handleAdjustTimer}
         />
       );
+      }
       case View.MOVEMENTS: return <MovementsView currentUser={currentUser} onDeleteLog={handleDeleteLog} onEditLog={handleEditLog} />;
       case View.PROJECT_LIST: return <ProjectList projects={projects} onEditProject={(p) => setEditingProject(p as LocalProject)} />;
       case View.REPORTS: return <Reports projects={projects} historicalLogs={historicalLogs} onManualCommit={() => commitDailyLogs()} />;
@@ -627,9 +641,12 @@ const App: React.FC = () => {
 
       {isManualModalOpen && (
         <ManualTimeModal 
+          key={`${pendingNewProjectId || ''}-${projects.length}`}
           projects={projects}
-          onClose={() => setIsManualModalOpen(false)}
+          onClose={() => { setIsManualModalOpen(false); setPendingNewProjectId(null); }}
           onSave={(id, secs, date) => handleManualTimeEntry(id, secs, date || new Date().toISOString().split('T')[0])}
+          onNewProject={() => setIsModalOpen(true)}
+          defaultProjectId={pendingNewProjectId || undefined}
           showDatePicker
         />
       )}
@@ -646,8 +663,8 @@ const App: React.FC = () => {
   );
 };
 
-const ManualTimeModal: React.FC<{ projects: Project[]; onClose: () => void; onSave: (id: string, secs: number, date?: string) => void; title?: string; showDatePicker?: boolean }> = ({ projects, onClose, onSave, title = "Inyección de Datos Manual", showDatePicker = false }) => {
-  const [selId, setSelId] = useState(projects[0]?.id || '');
+const ManualTimeModal: React.FC<{ projects: Project[]; onClose: () => void; onSave: (id: string, secs: number, date?: string) => void; title?: string; showDatePicker?: boolean; onNewProject?: () => void; defaultProjectId?: string }> = ({ projects, onClose, onSave, title = "Inyección de Datos Manual", showDatePicker = false, onNewProject, defaultProjectId }) => {
+  const [selId, setSelId] = useState(defaultProjectId || projects[0]?.id || '');
   const [hours, setHours] = useState('');
   const [minutes, setMinutes] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -688,9 +705,16 @@ const ManualTimeModal: React.FC<{ projects: Project[]; onClose: () => void; onSa
         <div className="space-y-8">
           <div>
             <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2">Nodo del Sistema</label>
-            <select value={selId} tabIndex={1} onChange={e=>setSelId(e.target.value)} className="w-full bg-mod-dark border border-mod-border text-mod-fg p-4 font-mono text-sm outline-none focus:border-mod-blue">
-              {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
+            <div className="flex items-end gap-2">
+              <select value={selId} tabIndex={1} onChange={e=>setSelId(e.target.value)} className="flex-1 bg-mod-dark border border-mod-border text-mod-fg p-4 font-mono text-sm outline-none focus:border-mod-blue">
+                {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+              {onNewProject && (
+                <button onClick={onNewProject} className="h-[60px] w-[60px] border border-mod-border bg-mod-dark text-mod-blue hover:bg-mod-blue hover:text-mod-fg transition-colors flex items-center justify-center flex-shrink-0" title="Nuevo Proyecto">
+                  <span className="material-symbols-outlined text-sm">add</span>
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-8">
@@ -726,14 +750,28 @@ const ManualTimeModal: React.FC<{ projects: Project[]; onClose: () => void; onSa
 };
 
 const ProjectModal: React.FC<{ project: Project | null; onClose: () => void; onSave: (data: any) => void; }> = ({ project, onClose, onSave }) => {
-  const [formData, setFormData] = useState({ name: project?.name || '', category: project?.category || '', color: project?.color || VIBRANT_COLORS[0] });
+  const [formData, setFormData] = useState({ name: project?.name || '', category: project?.category || '', color: project?.color || VIBRANT_COLORS[0], isGlobal: project?.isGlobal ?? false });
   return (
-    <div className="fixed inset-0 bg-mod-dark/95 backdrop-blur-md z-[200] flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-mod-dark/95 backdrop-blur-md z-[250] flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-mod-card border border-mod-fg/20 w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
         <h3 className="text-mod-fg font-black uppercase tracking-widest text-xs mb-6">{project ? 'Modificar' : 'Crear'} Unidad</h3>
         <div className="space-y-4">
           <input autoFocus value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value.toUpperCase()})} className="w-full bg-mod-dark border border-mod-border text-mod-fg p-3 font-mono" placeholder="ID_UNIDAD" />
           <input value={formData.category} onChange={e=>setFormData({...formData, category: e.target.value})} className="w-full bg-mod-dark border border-mod-border text-mod-fg p-3" placeholder="CATEGORÍA" />
+          {!project && (
+            <div>
+              <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2">Alcance</label>
+              <div className="flex items-center gap-3">
+                <span className={`text-[10px] font-black uppercase tracking-widest ${!formData.isGlobal ? 'text-mod-blue' : 'text-slate-500'}`}>Personal</span>
+                <button role="switch" aria-checked={formData.isGlobal}
+                  onClick={() => setFormData({...formData, isGlobal: !formData.isGlobal})}
+                  className={`relative h-6 w-12 border transition-colors ${formData.isGlobal ? 'bg-mod-blue border-mod-blue' : 'bg-mod-dark border-mod-border'}`}>
+                  <span className={`absolute top-0.5 h-4 w-4 bg-mod-fg transition-all ${formData.isGlobal ? 'left-[26px]' : 'left-0.5'}`} />
+                </button>
+                <span className={`text-[10px] font-black uppercase tracking-widest ${formData.isGlobal ? 'text-mod-blue' : 'text-slate-500'}`}>Global</span>
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-5 gap-2">
             {VIBRANT_COLORS.map(c => (
               <button key={c} onClick={()=>setFormData({...formData, color: c})} className={`h-8 ${c} border ${formData.color === c ? 'border-mod-fg scale-110' : 'border-transparent opacity-50'} transition-all`} />

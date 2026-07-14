@@ -3,6 +3,7 @@ import { Project, User, Role } from '../types';
 
 interface DashboardGridProps {
   projects: (Project & { sessionOrigin?: string; isHiddenForUser?: boolean; sessionComment?: string })[];
+  manualTodayByProject?: Record<string, number>;
   currentUser: User;
   showHidden: boolean;
   onToggleTimer: (projectId: string) => void;
@@ -18,6 +19,7 @@ interface DashboardGridProps {
 
 const DashboardGrid: React.FC<DashboardGridProps> = ({ 
   projects, 
+  manualTodayByProject = {},
   currentUser, 
   showHidden, 
   onToggleTimer, 
@@ -45,6 +47,13 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({
         {h}{separator}{m}{separator}{s}
       </span>
     );
+  };
+
+  const formatManualTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    if (h > 0) return `+${h}h ${m.toString().padStart(2, '0')}m`;
+    return `+${m}m`;
   };
 
   const currentOrder = localOrder || currentUser.projectOrder || projects.map(p => p.id);
@@ -189,6 +198,11 @@ const DashboardGrid: React.FC<DashboardGridProps> = ({
                   <div className="text-base lg:text-xl xl:text-4xl font-mono font-bold tracking-tighter leading-tight overflow-hidden">
                     {formatTimerWithSeconds(project.currentDaySeconds, isRunning)}
                   </div>
+                  {manualTodayByProject[project.id] > 0 && (
+                    <span className={`text-[10px] lg:text-xs xl:text-sm font-mono font-bold ml-1 ${isLight ? 'text-emerald-700' : 'text-mod-blue'}`}>
+                      {formatManualTime(manualTodayByProject[project.id])}
+                    </span>
+                  )}
                   {(project.currentDaySeconds > 0) && onAdjustTimer && (
                     <div className="flex items-center gap-0.5 pointer-events-auto" onClick={e => e.stopPropagation()}>
                       <button
